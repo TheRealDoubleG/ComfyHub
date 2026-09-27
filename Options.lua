@@ -3,7 +3,9 @@ local CH = ComfyHub
 
 local controls = {}
 local currentPage = 1
+local previewPage = 1
 local ROWS_PER_PAGE = 15
+local PREVIEW_ROWS_PER_PAGE = 15
 
 local STATUS_COLORS = {
     green = {0.20, 1.00, 0.20},
@@ -117,6 +119,112 @@ local function SelectTab(index)
     end
 end
 
+function CH:SelectOptionsTab(index)
+    SelectTab(index)
+end
+
+function CH:IsAddonManagerPreviewEnabled()
+    return self.db
+        and self.db.ui
+        and self.db.ui.addonManagerPreviewStyle
+        and true
+        or false
+end
+
+function CH:GetAddonPreviewStats()
+    local enabled = 0
+    local problems = 0
+    local cpuTotal = 0
+    local cpuValues = 0
+
+    for _, addon in ipairs(self.addonList or {}) do
+        if addon.enabled then enabled = enabled + 1 end
+        if addon.statusKey == "red" or addon.statusKey == "yellow" then
+            problems = problems + 1
+        end
+
+        local cpu = tonumber(self:GetCPUPercent(addon.name))
+        if cpu then
+            cpuTotal = cpuTotal + cpu
+            cpuValues = cpuValues + 1
+        end
+    end
+
+    return {
+        enabled = enabled,
+        problems = problems,
+        cpu = cpuValues > 0 and cpuTotal or nil,
+        memory = self.totalMemoryKB or 0,
+    }
+end
+
+function CH:RefreshAddonPreviewRows(resetPage)
+    if not self.addonPreviewRows then return end
+    if resetPage then previewPage = 1 end
+
+    local list = self:GetVisibleAddonList()
+    local pages = math.max(1, math.ceil(#list / PREVIEW_ROWS_PER_PAGE))
+    if previewPage > pages then previewPage = pages end
+    if previewPage < 1 then previewPage = 1 end
+
+    for rowIndex, row in ipairs(self.addonPreviewRows) do
+        local dataIndex = (previewPage - 1) * PREVIEW_ROWS_PER_PAGE + rowIndex
+        local addon = list[dataIndex]
+        row._addon = addon
+
+        if addon then
+            row:Show()
+            row.check:SetChecked(addon.enabled and true or false)
+            row.icon:SetTexture(addon.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+            row.icon:SetDesaturated(not addon.enabled)
+            row.name:SetText(addon.title or addon.name)
+            row.name:SetTextColor(addon.enabled and 1.00 or 0.52, addon.enabled and 0.82 or 0.52, addon.enabled and 0.00 or 0.52)
+
+            local color = STATUS_COLORS[addon.statusKey] or STATUS_COLORS.unknown
+            row.status:SetText(tostring(addon.statusText or ""))
+            row.status:SetTextColor(color[1], color[2], color[3])
+
+            if addon.enabled then
+                row.metric:SetText(FormatCPU(self:GetCPUPercent(addon.name)))
+            else
+                row.metric:SetText(self:T("INACTIVE"))
+            end
+        else
+            row:Hide()
+        end
+    end
+
+    local stats = self:GetAddonPreviewStats()
+    if self.previewCpuValue then self.previewCpuValue:SetText(FormatCPU(stats.cpu)) end
+    if self.previewMemoryValue then self.previewMemoryValue:SetText(FormatMemory(stats.memory)) end
+    if self.previewEnabledValue then self.previewEnabledValue:SetText(tostring(stats.enabled)) end
+    if self.previewProblemsValue then self.previewProblemsValue:SetText(tostring(stats.problems)) end
+
+    if self.previewResultText then
+        self.previewResultText:SetText(string.format(self:T("ADDON_RESULTS"), #list, #(self.addonList or {})))
+    end
+    if self.previewPageText then
+        self.previewPageText:SetText(string.format("%s %d / %d", self:T("PAGE"), previewPage, pages))
+    end
+    if self.previewPendingText then
+        self.previewPendingText:SetText(self:GetPendingText())
+    end
+
+    if self.previewSearchBox and not self.previewSearchBox:HasFocus() then
+        local wanted = tostring(self.addonSearchText or "")
+        if self.previewSearchBox:GetText() ~= wanted then self.previewSearchBox:SetText(wanted) end
+    end
+    if self.previewFilterDropdown and self.previewFilterDropdown._refresh then self.previewFilterDropdown._refresh() end
+    if self.previewSortDropdown and self.previewSortDropdown._refresh then self.previewSortDropdown._refresh() end
+end
+
+function CH:ApplyAddonManagerViewMode()
+    if not self.addonPreviewFrame then return end
+    local preview = self:IsAddonManagerPreviewEnabled()
+    self.addonPreviewFrame:SetShown(preview)
+    if preview then self:RefreshAddonPreviewRows(false) end
+end
+
 function CH:GetPendingText()
     local count = self:GetPendingCount()
     if count == 0 then return self:T("PENDING_NONE") end
@@ -169,6 +277,10 @@ function CH:RefreshAddonRows(resetPage)
 
     if self.pendingText then
         self.pendingText:SetText(self:GetPendingText())
+    end
+
+    if self:IsAddonManagerPreviewEnabled() then
+        self:RefreshAddonPreviewRows(resetPage)
     end
 end
 
@@ -265,6 +377,8 @@ function CH:RefreshOptions()
     if self.addonFilterDropdown and self.addonFilterDropdown._refresh then self.addonFilterDropdown._refresh() end
     if self.addonSortDropdown and self.addonSortDropdown._refresh then self.addonSortDropdown._refresh() end
     if self.memoryIntervalDropdown and self.memoryIntervalDropdown._refresh then self.memoryIntervalDropdown._refresh() end
+    self:ApplyAddonManagerViewMode()
+    self:RefreshAddonPreviewRows(false)
     if self.RefreshSharedSettingsPage then self:RefreshSharedSettingsPage() end
 end
 
@@ -516,6 +630,225 @@ function CH:InitializeOptions()
     self.pendingText:SetPoint("TOPLEFT", 20, -575)
     self.pendingText:SetWidth(500)
     self.pendingText:SetJustifyH("LEFT")
+
+    -- Experimental compact manager preview.
+    -- This is original ComfyHub code using Blizzard/Comfy assets only; it intentionally
+    -- borrows only broad information-density ideas from the user's reference screenshot.
+    local preview = CreateFrame("Frame", nil, addons, "BackdropTemplate")
+    preview:SetAllPoints(addons)
+    preview:SetFrameLevel(addons:GetFrameLevel() + 20)
+    preview:SetBackdrop({
+        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 12,
+        insets = {left = 4, right = 4, top = 4, bottom = 4},
+    })
+    preview:SetBackdropColor(0.025, 0.025, 0.025, 0.98)
+    preview:SetBackdropBorderColor(0.48, 0.38, 0.18, 1)
+    preview:Hide()
+    self.addonPreviewFrame = preview
+
+    local previewTitle = preview:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    previewTitle:SetPoint("TOP", 0, -8)
+    previewTitle:SetText("ComfyHub  ·  " .. self:T("TAB_ADDONS"))
+    previewTitle:SetTextColor(1.00, 0.82, 0.00)
+
+    self.previewFilterDropdown = CreateDropdown(preview, 4, -35, 130,
+        function()
+            return {
+                {value="all", text=CH:T("FILTER_ALL")},
+                {value="enabled", text=CH:T("FILTER_ENABLED")},
+                {value="disabled", text=CH:T("FILTER_DISABLED")},
+                {value="loaded", text=CH:T("FILTER_LOADED")},
+                {value="problems", text=CH:T("FILTER_PROBLEMS")},
+            }
+        end,
+        function() return CH:GetAddonListFilter() end,
+        function(value)
+            CH:SetAddonListFilter(value)
+            previewPage = 1
+            CH:RefreshAddonPreviewRows(true)
+        end)
+
+    self.previewSearchBox = CreateFrame("EditBox", nil, preview, "InputBoxTemplate")
+    self.previewSearchBox:SetPoint("TOPLEFT", 165, -30)
+    self.previewSearchBox:SetSize(250, 28)
+    self.previewSearchBox:SetAutoFocus(false)
+    self.previewSearchBox:SetTextInsets(24, 8, 0, 0)
+    self.previewSearchBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    self.previewSearchBox:SetScript("OnTextChanged", function(self)
+        CH.addonSearchText = self:GetText() or ""
+        previewPage = 1
+        CH:RefreshAddonPreviewRows(true)
+    end)
+
+    local searchIcon = self.previewSearchBox:CreateTexture(nil, "ARTWORK")
+    searchIcon:SetSize(14, 14)
+    searchIcon:SetPoint("LEFT", 6, 0)
+    searchIcon:SetTexture("Interface\\Common\\UI-Searchbox-Icon")
+
+    self.previewSortDropdown = CreateDropdown(preview, 425, -35, 175,
+        function()
+            return {
+                {value="suite", text=CH:T("SORT_SUITE")},
+                {value="name", text=CH:T("SORT_NAME")},
+                {value="memory", text=CH:T("SORT_MEMORY")},
+                {value="status", text=CH:T("SORT_STATUS")},
+            }
+        end,
+        function() return CH:GetAddonListSort() end,
+        function(value)
+            CH:SetAddonListSort(value)
+            previewPage = 1
+            CH:RefreshAddonPreviewRows(true)
+        end)
+
+    CreateButton(preview, self:T("PREVIEW_PROFILES"), 750, -29, 115, function()
+        CH:SelectOptionsTab(5)
+    end)
+
+    local function PreviewStat(x, title, accent)
+        local titleText = preview:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        titleText:SetPoint("TOPLEFT", x, -82)
+        titleText:SetWidth(185)
+        titleText:SetJustifyH("CENTER")
+        titleText:SetText(title)
+        titleText:SetTextColor(accent[1], accent[2], accent[3])
+
+        local valueText = preview:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+        valueText:SetPoint("TOPLEFT", x, -101)
+        valueText:SetWidth(185)
+        valueText:SetJustifyH("CENTER")
+        return valueText
+    end
+
+    self.previewCpuValue = PreviewStat(25, self:T("PREVIEW_CURRENT_CPU"), {0.45, 1.00, 0.45})
+    self.previewMemoryValue = PreviewStat(235, self:T("PREVIEW_MEMORY"), {1.00, 0.82, 0.20})
+    self.previewEnabledValue = PreviewStat(445, self:T("PREVIEW_ENABLED"), {0.45, 0.80, 1.00})
+    self.previewProblemsValue = PreviewStat(655, self:T("PREVIEW_PROBLEMS"), {1.00, 0.40, 0.35})
+
+    local listBox = CreateFrame("Frame", nil, preview, "BackdropTemplate")
+    listBox:SetPoint("TOPLEFT", 12, -132)
+    listBox:SetPoint("BOTTOMRIGHT", -12, 54)
+    listBox:SetBackdrop({
+        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = true, tileSize = 16, edgeSize = 1,
+        insets = {left = 1, right = 1, top = 1, bottom = 1},
+    })
+    listBox:SetBackdropColor(0.01, 0.01, 0.01, 0.72)
+    listBox:SetBackdropBorderColor(0.22, 0.22, 0.22, 0.85)
+
+    self.addonPreviewRows = {}
+    for i = 1, PREVIEW_ROWS_PER_PAGE do
+        local y = -5 - (i - 1) * 26
+        local row = CreateFrame("Frame", nil, listBox)
+        row:SetPoint("TOPLEFT", 5, y)
+        row:SetPoint("TOPRIGHT", -5, y)
+        row:SetHeight(25)
+
+        local shade = row:CreateTexture(nil, "BACKGROUND")
+        shade:SetAllPoints()
+        shade:SetColorTexture(1, 1, 1, 0)
+        row.shade = shade
+
+        local check = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
+        check:SetSize(24, 24)
+        check:SetPoint("LEFT", 3, 0)
+        check:SetScript("OnClick", function(self)
+            local parent = self:GetParent()
+            local addon = parent and parent._addon
+            if not addon then return end
+            local enabled = self:GetChecked() and true or false
+            CH:SetAddOnEnabledCompat(addon.name, enabled)
+            addon.enabled = enabled
+            CH:RefreshOptions()
+        end)
+        row.check = check
+
+        local icon = row:CreateTexture(nil, "ARTWORK")
+        icon:SetSize(18, 18)
+        icon:SetPoint("LEFT", 32, 0)
+        icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+        row.icon = icon
+
+        local name = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        name:SetPoint("LEFT", 57, 0)
+        name:SetWidth(455)
+        name:SetJustifyH("LEFT")
+        row.name = name
+
+        local status = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        status:SetPoint("LEFT", 530, 0)
+        status:SetWidth(170)
+        status:SetJustifyH("LEFT")
+        row.status = status
+
+        local metric = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        metric:SetPoint("RIGHT", -12, 0)
+        metric:SetWidth(120)
+        metric:SetJustifyH("RIGHT")
+        row.metric = metric
+
+        row:EnableMouse(true)
+        row:SetScript("OnEnter", function(self)
+            self.shade:SetColorTexture(1, 0.82, 0, 0.06)
+            local addon = self._addon
+            if not addon then return end
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(addon.title or addon.name or "Addon", 1.00, 0.82, 0.00)
+            GameTooltip:AddLine((CH:T("ADDON_FOLDER") .. ": ") .. tostring(addon.name or "-"), 0.70, 0.70, 0.70)
+            if addon.description and addon.description ~= "" then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine(addon.description, 1, 1, 1, true)
+            end
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddDoubleLine(CH:T("COL_MEMORY"), FormatMemory(addon.memoryKB), 0.8,0.8,0.8, 1,1,1)
+            GameTooltip:AddDoubleLine(CH:T("COL_CPU"), FormatCPU(CH:GetCPUPercent(addon.name)), 0.8,0.8,0.8, 1,1,1)
+            GameTooltip:Show()
+        end)
+        row:SetScript("OnLeave", function(self)
+            self.shade:SetColorTexture(1, 1, 1, 0)
+            GameTooltip:Hide()
+        end)
+
+        self.addonPreviewRows[i] = row
+    end
+
+    CreateButton(preview, self:T("PREVIOUS"), 14, -544, 92, function()
+        previewPage = math.max(1, previewPage - 1)
+        CH:RefreshAddonPreviewRows(false)
+    end)
+
+    self.previewPageText = preview:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    self.previewPageText:SetPoint("TOPLEFT", 112, -550)
+    self.previewPageText:SetWidth(115)
+    self.previewPageText:SetJustifyH("CENTER")
+
+    CreateButton(preview, self:T("NEXT"), 232, -544, 92, function()
+        local list = CH:GetVisibleAddonList()
+        local pages = math.max(1, math.ceil(#list / PREVIEW_ROWS_PER_PAGE))
+        previewPage = math.min(pages, previewPage + 1)
+        CH:RefreshAddonPreviewRows(false)
+    end)
+
+    self.previewResultText = preview:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    self.previewResultText:SetPoint("TOPLEFT", 342, -550)
+    self.previewResultText:SetWidth(165)
+    self.previewResultText:SetJustifyH("LEFT")
+
+    self.previewPendingText = preview:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    self.previewPendingText:SetPoint("TOPLEFT", 500, -550)
+    self.previewPendingText:SetWidth(170)
+    self.previewPendingText:SetJustifyH("LEFT")
+
+    CreateButton(preview, self:T("REFRESH"), 674, -544, 92, function()
+        CH:RefreshData(true)
+    end)
+
+    CreateButton(preview, self:T("APPLY_RELOAD"), 772, -544, 105, function()
+        if type(ReloadUI) == "function" then ReloadUI() end
+    end)
 
     -- Performance
     local perf = frame.pages[2]
