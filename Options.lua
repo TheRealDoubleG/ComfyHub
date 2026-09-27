@@ -336,7 +336,11 @@ function CH:RefreshSuiteRows()
         elseif loaded then
             row.state:SetText(self:T("LOADED"))
             row.state:SetTextColor(0.20, 1.00, 0.20)
-            row.open:SetEnabled(true)
+            local entry
+            for _, candidate in ipairs(self.family or {}) do
+                if candidate.name == name then entry = candidate break end
+            end
+            row.open:SetEnabled(not entry or entry.openable ~= false)
         else
             row.state:SetText(self:T("NOT_LOADED"))
             row.state:SetTextColor(1.00, 0.82, 0.00)
@@ -955,7 +959,7 @@ function CH:InitializeOptions()
 
     for i, entry in ipairs(self.family or {}) do
         local name = entry.name
-        local y = -82 - (i - 1) * 40
+        local y = -70 - (i - 1) * 32
 
         local icon = suite:CreateTexture(nil,"ARTWORK")
         icon:SetSize(20,20); icon:SetPoint("TOPLEFT",25,y+4); icon:SetTexture(entry.icon); icon:SetTexCoord(0.07,0.93,0.07,0.93)
@@ -983,7 +987,7 @@ function CH:InitializeOptions()
     end
 
     local suiteNote = suite:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    suiteNote:SetPoint("TOPLEFT", 20, -535)
+    suiteNote:SetPoint("TOPLEFT", 20, -520)
     suiteNote:SetWidth(760)
     suiteNote:SetJustifyH("LEFT")
     suiteNote:SetText((GetLocale and GetLocale() == "deDE")
