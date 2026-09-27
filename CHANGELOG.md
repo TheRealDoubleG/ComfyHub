@@ -1,5 +1,13 @@
 # ComfyHub Changelog
 
+## 0.11 Beta – 27.09.2026
+- Switched the normal CPU path to WoW Forever's native C_AddOnProfiler API.
+- Added current, recent-average, peak and encounter CPU time columns in milliseconds.
+- Removed the need to toggle scriptProfile or reload the UI for normal Forever CPU measurements.
+- Expanded the Comfy Suite registry with ComfyEnemyBar, ComfyPanel, ComfyBag, ComfyMog, ComfyXP, ComfyProfiles and ComfyKey.
+- Reworked the Comfy Suite page into a compact eleven-addon list.
+- Kept the minimap flyout compact: management shortcuts plus the existing core tools are shown, while the full suite remains available in ComfyHub.
+
 ## 0.10 Beta – 27.09.2026
 - Added an optional **experimental compact manager preview** under Settings for local layout comparison.
 - The preview uses an original ComfyHub implementation with Blizzard/Comfy assets only; no Addon Manargl code or artwork is copied.
