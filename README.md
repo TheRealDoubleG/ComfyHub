@@ -1,0 +1,47 @@
+# ComfyHub
+
+**Version 0.1 – Beta**  
+**Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
+Author: **TheRealDoubleG**  
+Discord: **the.real.double.g**
+
+ComfyHub is the central addon manager, performance overview and minimap hub for the Comfy Suite on WoW Forever.
+
+## 0.1 Beta foundation
+
+- Lists installed addons with enable/disable checkboxes.
+- Shows installed addon version and WoW interface compatibility.
+- Uses three simple compatibility states:
+  - **Green:** compatible with the current client.
+  - **Yellow:** out of date / interface mismatch.
+  - **Red:** an explicit load or dependency problem was detected.
+- Shows per-addon memory usage and total addon memory.
+- Optional CPU profiling support when the WoW client exposes addon CPU profiling.
+- Changes can be prepared first and applied with a single **Apply & Reload** action.
+- Central ComfyHub minimap button.
+- Left click on ComfyHub toggles a small flyout for **OnPoint**, **ComfyBar** and **ComfyCC**.
+- Right click on ComfyHub opens the manager.
+- Flyout buttons open the corresponding Comfy addon settings when that addon is loaded.
+- German UI on a German client, English otherwise.
+- Blizzard-style Info tab with version, build target, author and Discord contact.
+
+## Comfy Suite
+
+- **ComfyHub** – central addon manager and minimap hub.
+- **ComfyBar** – customizable utility bars.
+- **ComfyCC** – cooldown countdown numbers.
+- **OnPoint** – cursor-following tooltip improvements.
+
+## Important version-status note
+
+ComfyHub 0.1 can determine whether an installed addon matches the current WoW Forever interface and whether WoW reports a load/dependency problem.
+
+It cannot determine the newest internet release of arbitrary third-party addons from inside the game. A later optional companion/manifest system can add true online version checking for supported addons.
+
+## Slash commands
+
+- `/comfyhub` or `/ch` – open ComfyHub.
+- `/ch flyout` – toggle the Comfy minimap flyout.
+- `/ch refresh` – refresh addon and performance data.
+
+ComfyHub changes only addon/UI configuration and presentation. It does not automate gameplay.
