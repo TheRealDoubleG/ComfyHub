@@ -1,7 +1,7 @@
 ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
-local FLYOUT_COLUMNS = 3
+local FLYOUT_COLUMNS = 4
 local FLYOUT_BUTTON_SIZE = 30
 local FLYOUT_GAP = 4
 local FLYOUT_PADDING = 6
