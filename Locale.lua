@@ -60,6 +60,7 @@ local EN = {
     MINIMAP_DRAG = "Drag: move around the minimap",
     MINIMAP_LOCKED = "Minimap button is locked",
     MINIMAP_SHOW = "Show ComfyHub minimap button",
+    MINIMAP_BUNDLE = "Bundle Comfy Suite minimap icons under ComfyHub",
     MINIMAP_LOCK = "Lock ComfyHub minimap button",
 
     INFO_TITLE = "ComfyHub",
@@ -141,6 +142,7 @@ local DE = {
     MINIMAP_DRAG = "Ziehen: um die Minimap verschieben",
     MINIMAP_LOCKED = "Minimap-Button ist gesperrt",
     MINIMAP_SHOW = "ComfyHub-Minimap-Button anzeigen",
+    MINIMAP_BUNDLE = "Comfy-Suite-Minimap-Icons unter ComfyHub bündeln",
     MINIMAP_LOCK = "ComfyHub-Minimap-Button sperren",
 
     INFO_VERSION = "Version",
