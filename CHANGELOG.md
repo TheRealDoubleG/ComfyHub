@@ -1,5 +1,15 @@
 # ComfyHub Changelog
 
+## 0.7 Beta – 27.09.2026
+- Reworked the minimap flyout into a tighter arc around the minimap edge.
+- Added a subtle dark flyout background with a thin bronze WoW-style border.
+- Reduced the visual weight of the ComfyHub/flyout icon border to better match the minimap frame.
+- Added a Comfy Suite option to bundle or restore the individual addon minimap buttons.
+- Fixed ComfyBar remaining visible while bundling was enabled.
+- Fixed individual addon minimap buttons not restoring/hiding consistently when bundling was toggled.
+- Collapsed state now shows only the ComfyHub minimap button.
+
+
 ## 0.6 Beta – 27.09.2026
 - Added **ComfyMacro** to the Comfy Suite registry.
 - Added ComfyMacro to the Comfy Suite page and central minimap flyout.
