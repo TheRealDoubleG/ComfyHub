@@ -98,8 +98,8 @@ end
 local function FormatCPU(value)
     value = tonumber(value)
     if value == nil then return "—" end
-    if value > 0 and value < 0.01 then return "<0.01%" end
-    return string.format("%.2f%%", value)
+    if value > 0 and value < 0.01 then return "<0.01 ms" end
+    return string.format("%.2f ms", value)
 end
 
 local function SelectTab(index)
@@ -284,6 +284,29 @@ function CH:RefreshAddonRows(resetPage)
     end
 end
 
+function CH:RefreshProfilerRows()
+    if not self.profilerRows then return end
+    local list={}
+    for _,addon in ipairs(self.addonList or {}) do if addon.loaded then list[#list+1]=addon end end
+    table.sort(list,function(a,b)
+        local ap=tonumber(self:GetCPUMetric(a.name,"peak")) or -1
+        local bp=tonumber(self:GetCPUMetric(b.name,"peak")) or -1
+        if ap~=bp then return ap>bp end
+        return tostring(a.title):lower()<tostring(b.title):lower()
+    end)
+    for i,row in ipairs(self.profilerRows) do
+        local addon=list[i]
+        if addon then
+            row.frame:Show()
+            row.name:SetText(addon.title or addon.name)
+            row.current:SetText(FormatCPU(self:GetCPUMetric(addon.name,"current")))
+            row.recent:SetText(FormatCPU(self:GetCPUMetric(addon.name,"recent")))
+            row.peak:SetText(FormatCPU(self:GetCPUMetric(addon.name,"peak")))
+            row.encounter:SetText(FormatCPU(self:GetCPUMetric(addon.name,"encounter")))
+        else row.frame:Hide() end
+    end
+end
+
 function CH:RefreshSuiteRows()
     if not self.suiteRows then return end
 
@@ -356,22 +379,17 @@ function CH:RefreshOptions()
     end
 
     if self.cpuStateText then
-        if not self:IsCPUProfilingEnabled() then
-            self.cpuStateText:SetText(self:T("CPU_UNAVAILABLE"))
-            self.cpuStateText:SetTextColor(1.00, 0.82, 0.00)
-        elseif self.cpuSampleState == "unavailable" then
-            self.cpuStateText:SetText((GetLocale and GetLocale() == "deDE") and "CPU: API nicht verfügbar" or "CPU: API unavailable")
-            self.cpuStateText:SetTextColor(1.00, 0.35, 0.20)
-        elseif self.cpuSampleState == "sampling" or self.cpuSampleState == nil then
-            self.cpuStateText:SetText((GetLocale and GetLocale() == "deDE") and "CPU: AN – Messwert wird gesammelt…" or "CPU: ON – collecting sample…")
-            self.cpuStateText:SetTextColor(1.00, 0.82, 0.00)
-        else
-            self.cpuStateText:SetText("CPU: ON")
+        if self:HasNativeProfiler() and self.cpuSampleState ~= "unavailable" then
+            self.cpuStateText:SetText(self:T("CPU_NATIVE_ACTIVE"))
             self.cpuStateText:SetTextColor(0.20, 1.00, 0.20)
+        else
+            self.cpuStateText:SetText(self:T("CPU_UNAVAILABLE"))
+            self.cpuStateText:SetTextColor(1.00, 0.35, 0.20)
         end
     end
 
     self:RefreshAddonRows()
+    self:RefreshProfilerRows()
     self:RefreshSuiteRows()
     self:RefreshLuaErrorUI(false)
     if self.addonFilterDropdown and self.addonFilterDropdown._refresh then self.addonFilterDropdown._refresh() end
@@ -864,26 +882,35 @@ function CH:InitializeOptions()
     ptitle:SetText(self:T("TAB_PERFORMANCE"))
 
     self.totalMemoryText = perf:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
-    self.totalMemoryText:SetPoint("TOPLEFT", 20, -60)
+    self.totalMemoryText:SetPoint("TOPLEFT", 20, -55)
 
     self.cpuStateText = perf:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    self.cpuStateText:SetPoint("TOPLEFT", 20, -100)
+    self.cpuStateText:SetPoint("TOPLEFT", 20, -92)
 
-    CreateCheck(perf, self:T("CPU_PROFILING"), 20, -145,
-        function() return CH:IsCPUProfilingEnabled() end,
-        function(v) CH:SetCPUProfilingRequested(v) end)
+    local hint=perf:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall")
+    hint:SetPoint("TOPLEFT",20,-120); hint:SetWidth(820); hint:SetJustifyH("LEFT"); hint:SetText(self:T("CPU_NATIVE_HINT"))
 
-    local cpuHint = perf:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    cpuHint:SetPoint("TOPLEFT", 45, -180)
-    cpuHint:SetWidth(780)
-    cpuHint:SetJustifyH("LEFT")
-    cpuHint:SetText(self:T("CPU_RELOAD_HINT"))
+    local headers={{self:T("COL_ADDON"),20},{self:T("CPU_CURRENT"),390},{self:T("CPU_RECENT"),500},{self:T("CPU_PEAK"),610},{self:T("CPU_ENCOUNTER"),720}}
+    for _,h in ipairs(headers) do local x=perf:CreateFontString(nil,"ARTWORK","GameFontNormal"); x:SetPoint("TOPLEFT",h[2],-165); x:SetText(h[1]) end
+
+    self.profilerRows={}
+    for i=1,11 do
+        local y=-190-(i-1)*27
+        local r=CreateFrame("Frame",nil,perf); r:SetPoint("TOPLEFT",15,y); r:SetSize(840,25)
+        local sep=r:CreateTexture(nil,"BACKGROUND"); sep:SetPoint("BOTTOMLEFT",0,0); sep:SetPoint("BOTTOMRIGHT",0,0); sep:SetHeight(1); sep:SetColorTexture(1,1,1,0.04)
+        local n=r:CreateFontString(nil,"ARTWORK","GameFontHighlight"); n:SetPoint("LEFT",5,0); n:SetWidth(350); n:SetJustifyH("LEFT")
+        local c=r:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall"); c:SetPoint("LEFT",375,0); c:SetWidth(100); c:SetJustifyH("LEFT")
+        local a=r:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall"); a:SetPoint("LEFT",485,0); a:SetWidth(100); a:SetJustifyH("LEFT")
+        local p=r:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall"); p:SetPoint("LEFT",595,0); p:SetWidth(100); p:SetJustifyH("LEFT")
+        local e=r:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall"); e:SetPoint("LEFT",705,0); e:SetWidth(105); e:SetJustifyH("LEFT")
+        self.profilerRows[i]={frame=r,name=n,current=c,recent=a,peak=p,encounter=e}
+    end
 
     local memoryIntervalLabel = perf:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    memoryIntervalLabel:SetPoint("TOPLEFT", 20, -225)
+    memoryIntervalLabel:SetPoint("TOPLEFT", 20, -505)
     memoryIntervalLabel:SetText(self:T("MEMORY_UPDATE"))
 
-    self.memoryIntervalDropdown = CreateDropdown(perf, 180, -238, 170,
+    self.memoryIntervalDropdown = CreateDropdown(perf, 180, -518, 170,
         function()
             return {
                 {value=0, text=CH:T("UPDATE_MANUAL")},
@@ -895,15 +922,7 @@ function CH:InitializeOptions()
         function() return CH:GetMemoryUpdateInterval() end,
         function(value) CH:SetMemoryUpdateInterval(value) end)
 
-    local performanceHint = perf:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    performanceHint:SetPoint("TOPLEFT", 20, -285)
-    performanceHint:SetWidth(800)
-    performanceHint:SetJustifyH("LEFT")
-    performanceHint:SetText(self:T("PERFORMANCE_HINT"))
-
-    CreateButton(perf, self:T("REFRESH"), 20, -365, 140, function()
-        CH:RefreshData(true)
-    end)
+    CreateButton(perf, self:T("REFRESH"), 590, -515, 130, function() CH:RefreshData(true) end)
 
     -- Suite
     local suite = frame.pages[3]
@@ -919,39 +938,38 @@ function CH:InitializeOptions()
     suiteHint:SetText(self:T("SUITE_HINT"))
 
     self.suiteRows = {}
-    local suiteNames = {"ComfyOnPoint", "ComfyBar", "ComfyCC", "ComfyMacro"}
 
-    for i, name in ipairs(suiteNames) do
-        local y = -115 - (i - 1) * 70
+    for i, entry in ipairs(self.family or {}) do
+        local name = entry.name
+        local y = -82 - (i - 1) * 40
 
-        local addonName = suite:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-        addonName:SetPoint("TOPLEFT", 30, y)
+        local icon = suite:CreateTexture(nil,"ARTWORK")
+        icon:SetSize(20,20); icon:SetPoint("TOPLEFT",25,y+4); icon:SetTexture(entry.icon); icon:SetTexCoord(0.07,0.93,0.07,0.93)
+
+        local addonName = suite:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        addonName:SetPoint("TOPLEFT", 55, y)
+        addonName:SetWidth(245)
         addonName:SetText(name)
 
         local version = suite:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-        version:SetPoint("TOPLEFT", 250, y + 2)
+        version:SetPoint("TOPLEFT", 320, y + 1)
         version:SetWidth(100)
         version:SetJustifyH("LEFT")
 
         local state = suite:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-        state:SetPoint("TOPLEFT", 380, y + 2)
-        state:SetWidth(160)
+        state:SetPoint("TOPLEFT", 440, y + 1)
+        state:SetWidth(150)
         state:SetJustifyH("LEFT")
 
-        local openButton = CreateButton(suite, self:T("OPEN"), 590, y + 8, 120, function()
+        local openButton = CreateButton(suite, self:T("OPEN"), 620, y + 6, 110, function()
             CH:OpenSuiteAddon(name)
         end)
 
-        self.suiteRows[i] = {
-            addonName = name,
-            version = version,
-            state = state,
-            open = openButton,
-        }
+        self.suiteRows[i] = {addonName=name,version=version,state=state,open=openButton,icon=icon}
     end
 
     local suiteNote = suite:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    suiteNote:SetPoint("TOPLEFT", 20, -405)
+    suiteNote:SetPoint("TOPLEFT", 20, -535)
     suiteNote:SetWidth(760)
     suiteNote:SetJustifyH("LEFT")
     suiteNote:SetText((GetLocale and GetLocale() == "deDE")
