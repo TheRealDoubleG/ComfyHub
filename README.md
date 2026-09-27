@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.6 – Beta**  
+**Version 0.7 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -19,7 +19,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - Optional CPU profiling support when the WoW client exposes addon CPU profiling.
 - Changes can be prepared first and applied with a single **Apply & Reload** action.
 - Central ComfyHub minimap button.
-- Left click on ComfyHub toggles a small flyout for **ComfyOnPoint**, **ComfyBar**, **ComfyCC** and **ComfyMacro**.
+- Left click on ComfyHub toggles a compact minimap-edge flyout for **ComfyOnPoint**, **ComfyBar**, **ComfyCC** and **ComfyMacro**.\n- Comfy Suite minimap buttons are bundled under ComfyHub by default and can be restored from the Comfy Suite settings page.
 - Right click on ComfyHub opens the manager.
 - Flyout buttons open the corresponding Comfy addon settings when that addon is loaded.
 - German UI on a German client, English otherwise.
