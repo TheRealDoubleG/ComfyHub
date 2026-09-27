@@ -3,7 +3,7 @@ local CH = ComfyHub
 
 local controls = {}
 local currentPage = 1
-local ROWS_PER_PAGE = 16
+local ROWS_PER_PAGE = 15
 
 local STATUS_COLORS = {
     green = {0.20, 1.00, 0.20},
@@ -42,6 +42,47 @@ local function CreateCheck(parent, text, x, y, getter, setter)
     cb._getter = getter
     table.insert(controls, cb)
     return cb
+end
+
+local function DropdownSetText(dropdown, text)
+    if UIDropDownMenu_SetText then UIDropDownMenu_SetText(dropdown, text or "") end
+end
+
+local function CreateDropdown(parent, x, y, width, getItems, getCurrent, onSelect)
+    local dd = CreateFrame("Frame", nil, parent, "UIDropDownMenuTemplate")
+    dd:SetPoint("TOPLEFT", x, y)
+    if UIDropDownMenu_SetWidth then UIDropDownMenu_SetWidth(dd, width or 180) end
+
+    UIDropDownMenu_Initialize(dd, function(_, level)
+        local current = getCurrent()
+        for _, entry in ipairs(getItems() or {}) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = entry.text
+            info.value = entry.value
+            info.checked = entry.value == current
+            info.func = function()
+                onSelect(entry.value)
+                CloseDropDownMenus()
+                if dd._refresh then dd._refresh() end
+            end
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end)
+
+    dd._refresh = function()
+        local current = getCurrent()
+        local label = tostring(current or "")
+        for _, entry in ipairs(getItems() or {}) do
+            if entry.value == current then
+                label = entry.text
+                break
+            end
+        end
+        DropdownSetText(dd, label)
+    end
+
+    dd._refresh()
+    return dd
 end
 
 local function FormatMemory(kb)
@@ -83,10 +124,12 @@ function CH:GetPendingText()
     return string.format(self:T("PENDING_MANY"), count)
 end
 
-function CH:RefreshAddonRows()
+function CH:RefreshAddonRows(resetPage)
     if not self.addonRows then return end
+    if resetPage then currentPage = 1 end
 
-    local list = self.addonList or self:BuildAddonList()
+    local list = self:GetVisibleAddonList()
+    self.visibleAddonList = list
     local pages = math.max(1, math.ceil(#list / ROWS_PER_PAGE))
     if currentPage > pages then currentPage = pages end
     if currentPage < 1 then currentPage = 1 end
@@ -118,6 +161,10 @@ function CH:RefreshAddonRows()
 
     if self.pageText then
         self.pageText:SetText(string.format("%s %d / %d", self:T("PAGE"), currentPage, pages))
+    end
+
+    if self.addonResultText then
+        self.addonResultText:SetText(string.format(self:T("ADDON_RESULTS"), #list, #(self.addonList or {})))
     end
 
     if self.pendingText then
@@ -215,6 +262,9 @@ function CH:RefreshOptions()
     self:RefreshAddonRows()
     self:RefreshSuiteRows()
     self:RefreshLuaErrorUI(false)
+    if self.addonFilterDropdown and self.addonFilterDropdown._refresh then self.addonFilterDropdown._refresh() end
+    if self.addonSortDropdown and self.addonSortDropdown._refresh then self.addonSortDropdown._refresh() end
+    if self.memoryIntervalDropdown and self.memoryIntervalDropdown._refresh then self.memoryIntervalDropdown._refresh() end
     if self.RefreshSharedSettingsPage then self:RefreshSharedSettingsPage() end
 end
 
@@ -284,6 +334,57 @@ function CH:InitializeOptions()
     -- Addons
     local addons = frame.pages[1]
 
+    local searchLabel = addons:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    searchLabel:SetPoint("TOPLEFT", 20, -8)
+    searchLabel:SetText(self:T("SEARCH"))
+
+    self.addonSearchBox = CreateFrame("EditBox", nil, addons, "InputBoxTemplate")
+    self.addonSearchBox:SetPoint("TOPLEFT", 75, -2)
+    self.addonSearchBox:SetSize(245, 28)
+    self.addonSearchBox:SetAutoFocus(false)
+    self.addonSearchBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    self.addonSearchBox:SetScript("OnTextChanged", function(self)
+        CH.addonSearchText = self:GetText() or ""
+        CH:RefreshAddonRows(true)
+    end)
+
+    local filterLabel = addons:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    filterLabel:SetPoint("TOPLEFT", 345, -8)
+    filterLabel:SetText(self:T("FILTER"))
+
+    self.addonFilterDropdown = CreateDropdown(addons, 380, 9, 150,
+        function()
+            return {
+                {value="all", text=CH:T("FILTER_ALL")},
+                {value="enabled", text=CH:T("FILTER_ENABLED")},
+                {value="disabled", text=CH:T("FILTER_DISABLED")},
+                {value="loaded", text=CH:T("FILTER_LOADED")},
+                {value="problems", text=CH:T("FILTER_PROBLEMS")},
+            }
+        end,
+        function() return CH:GetAddonListFilter() end,
+        function(value) CH:SetAddonListFilter(value) end)
+
+    local sortLabel = addons:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    sortLabel:SetPoint("TOPLEFT", 585, -8)
+    sortLabel:SetText(self:T("SORT"))
+
+    self.addonSortDropdown = CreateDropdown(addons, 615, 9, 180,
+        function()
+            return {
+                {value="suite", text=CH:T("SORT_SUITE")},
+                {value="name", text=CH:T("SORT_NAME")},
+                {value="memory", text=CH:T("SORT_MEMORY")},
+                {value="status", text=CH:T("SORT_STATUS")},
+            }
+        end,
+        function() return CH:GetAddonListSort() end,
+        function(value) CH:SetAddonListSort(value) end)
+
+    self.addonResultText = addons:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    self.addonResultText:SetPoint("TOPRIGHT", -20, -8)
+    self.addonResultText:SetJustifyH("RIGHT")
+
     local headers = {
         {text = "", x = 20},
         {text = self:T("COL_ADDON"), x = 78},
@@ -295,14 +396,14 @@ function CH:InitializeOptions()
 
     for _, header in ipairs(headers) do
         local fs = addons:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-        fs:SetPoint("TOPLEFT", header.x, -18)
+        fs:SetPoint("TOPLEFT", header.x, -52)
         fs:SetText(header.text)
     end
 
     self.addonRows = {}
 
     for i = 1, ROWS_PER_PAGE do
-        local y = -43 - (i - 1) * 29
+        local y = -77 - (i - 1) * 29
         local row = CreateFrame("Frame", nil, addons)
         row:SetPoint("TOPLEFT", 10, y)
         row:SetSize(860, 27)
@@ -362,6 +463,27 @@ function CH:InitializeOptions()
         cpu:SetJustifyH("LEFT")
         row.cpu = cpu
 
+        row:EnableMouse(true)
+        row:SetScript("OnEnter", function(self)
+            local addon = self._addon
+            if not addon then return end
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(addon.title or addon.name or "Addon", 1.00, 0.82, 0.00)
+            GameTooltip:AddLine((CH:T("ADDON_FOLDER") .. ": ") .. tostring(addon.name or "-"), 0.75, 0.75, 0.75)
+            if addon.description and addon.description ~= "" then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine(addon.description, 1, 1, 1, true)
+            end
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddDoubleLine(CH:T("LOADED"), addon.loaded and CH:T("YES") or CH:T("NO"), 0.8,0.8,0.8, 1,1,1)
+            GameTooltip:AddDoubleLine(CH:T("ACTIVE"), addon.enabled and CH:T("YES") or CH:T("NO"), 0.8,0.8,0.8, 1,1,1)
+            if addon.reason and tostring(addon.reason) ~= "" then
+                GameTooltip:AddDoubleLine(CH:T("ADDON_REASON"), tostring(addon.reason), 0.8,0.8,0.8, 1,0.82,0)
+            end
+            GameTooltip:Show()
+        end)
+        row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
         self.addonRows[i] = row
     end
 
@@ -376,14 +498,14 @@ function CH:InitializeOptions()
     self.pageText:SetJustifyH("CENTER")
 
     CreateButton(addons, self:T("NEXT"), 275, -530, 100, function()
-        local list = CH.addonList or {}
+        local list = CH.visibleAddonList or CH:GetVisibleAddonList()
         local pages = math.max(1, math.ceil(#list / ROWS_PER_PAGE))
         currentPage = math.min(pages, currentPage + 1)
         CH:RefreshAddonRows()
     end)
 
     CreateButton(addons, self:T("REFRESH"), 575, -530, 120, function()
-        CH:RefreshData()
+        CH:RefreshData(true)
     end)
 
     CreateButton(addons, self:T("APPLY_RELOAD"), 705, -530, 160, function()
@@ -418,14 +540,30 @@ function CH:InitializeOptions()
     cpuHint:SetJustifyH("LEFT")
     cpuHint:SetText(self:T("CPU_RELOAD_HINT"))
 
+    local memoryIntervalLabel = perf:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    memoryIntervalLabel:SetPoint("TOPLEFT", 20, -225)
+    memoryIntervalLabel:SetText(self:T("MEMORY_UPDATE"))
+
+    self.memoryIntervalDropdown = CreateDropdown(perf, 180, -208, 170,
+        function()
+            return {
+                {value=0, text=CH:T("UPDATE_MANUAL")},
+                {value=5, text=string.format(CH:T("SECONDS"), 5)},
+                {value=10, text=string.format(CH:T("SECONDS"), 10)},
+                {value=30, text=string.format(CH:T("SECONDS"), 30)},
+            }
+        end,
+        function() return CH:GetMemoryUpdateInterval() end,
+        function(value) CH:SetMemoryUpdateInterval(value) end)
+
     local performanceHint = perf:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    performanceHint:SetPoint("TOPLEFT", 20, -250)
+    performanceHint:SetPoint("TOPLEFT", 20, -285)
     performanceHint:SetWidth(800)
     performanceHint:SetJustifyH("LEFT")
     performanceHint:SetText(self:T("PERFORMANCE_HINT"))
 
-    CreateButton(perf, self:T("REFRESH"), 20, -330, 140, function()
-        CH:RefreshData()
+    CreateButton(perf, self:T("REFRESH"), 20, -365, 140, function()
+        CH:RefreshData(true)
     end)
 
     -- Suite
@@ -680,7 +818,7 @@ function CH:InitializeOptions()
 
     frame:SetScript("OnShow", function()
         CH:ApplySharedWindowSettings()
-        CH:RefreshData()
+        CH:RefreshData(true)
     end)
 
     frame:SetScript("OnUpdate", function(self, elapsed)
@@ -688,7 +826,7 @@ function CH:InitializeOptions()
         if self._comfyElapsed >= 1.0 then
             self._comfyElapsed = 0
             if self:IsShown() then
-                CH:RefreshMemory()
+                CH:RefreshMemory(false)
                 CH:RefreshCPU()
                 CH:RefreshOptions()
             end
@@ -704,5 +842,5 @@ function CH:ShowOptions()
     if not self.optionsFrame then self:InitializeOptions() end
     self.optionsFrame:Show()
     self.optionsFrame:Raise()
-    self:RefreshData()
+    self:RefreshData(true)
 end
