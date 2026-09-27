@@ -1,12 +1,15 @@
 ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
+local FLYOUT_ANGLE_STEP = 22
+local FLYOUT_PADDING = 5
+
 local function GetButtonRadius(button)
     if not Minimap then return 95 end
     local width = Minimap:GetWidth() or 140
     local height = Minimap:GetHeight() or width
     local mapRadius = math.min(width, height) / 2
-    local buttonRadius = ((button and button:GetWidth()) or 32) / 2
+    local buttonRadius = ((button and button:GetWidth()) or 30) / 2
     return mapRadius + buttonRadius + 2
 end
 
@@ -22,36 +25,79 @@ end
 
 local function CreateRoundButton(name, parent, iconPath)
     local button = CreateFrame("Button", name, parent)
-    button:SetSize(32, 32)
+    button:SetSize(30, 30)
     button:SetFrameStrata("MEDIUM")
     button:SetFrameLevel(10)
     button:SetClampedToScreen(true)
 
     local background = button:CreateTexture(nil, "BACKGROUND")
     background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
-    background:SetSize(20, 20)
+    background:SetSize(23, 23)
     background:SetPoint("CENTER")
+    background:SetAlpha(0.75)
+    button.background = background
 
     local icon = button:CreateTexture(nil, "ARTWORK")
     icon:SetTexture(iconPath)
-    icon:SetSize(20, 20)
+    icon:SetSize(22, 22)
     icon:SetPoint("CENTER")
     icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     button.icon = icon
 
     local border = button:CreateTexture(nil, "OVERLAY")
     border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-    border:SetSize(54, 54)
+    border:SetSize(48, 48)
     border:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
+    border:SetVertexColor(0.82, 0.58, 0.30, 1)
+    button.border = border
 
     button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight", "ADD")
     return button
+end
+
+function CH:IsMinimapBundlingActive()
+    return self.db
+        and self.db.minimap
+        and self.db.minimap.show
+        and self.db.minimap.bundleSuiteIcons ~= false
+end
+
+function CH:ApplyMinimapBundling()
+    if not self.db or not self.db.minimap then return end
+    local bundled = self:IsMinimapBundlingActive()
+
+    for _, entry in ipairs(self.family or {}) do
+        local addon = rawget(_G, entry.name)
+        if type(addon) == "table" and type(addon.SetMinimapBundled) == "function" then
+            addon:SetMinimapBundled(bundled)
+        else
+            local button = rawget(_G, entry.name .. "MinimapButton")
+            if button then
+                if bundled then
+                    button:Hide()
+                else
+                    button:Show()
+                end
+            end
+        end
+    end
+end
+
+function CH:SetMinimapBundling(enabled)
+    if not self.db or not self.db.minimap then return end
+    self.db.minimap.bundleSuiteIcons = enabled and true or false
+    if not enabled then
+        self.flyoutShown = false
+    end
+    self:ApplyMinimapBundling()
+    self:RefreshFlyout()
 end
 
 function CH:UpdateMinimapPosition()
     if not self.minimapButton or not self.db then return end
     PositionFromAngle(self.minimapButton, self.db.minimap.angle)
     self.minimapButton:SetShown(self.db.minimap.show)
+    self:ApplyMinimapBundling()
 end
 
 function CH:OpenSuiteAddon(name)
@@ -83,6 +129,21 @@ function CH:CreateFlyout()
     if self.flyoutButtons then return end
     self.flyoutButtons = {}
 
+    local backdrop = CreateFrame("Frame", "ComfyHubFlyoutBackdrop", UIParent, "BackdropTemplate")
+    backdrop:SetFrameStrata("DIALOG")
+    backdrop:SetFrameLevel(18)
+    backdrop:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = false,
+        edgeSize = 7,
+        insets = {left = 2, right = 2, top = 2, bottom = 2},
+    })
+    backdrop:SetBackdropColor(0, 0, 0, 0.75)
+    backdrop:SetBackdropBorderColor(0.54, 0.36, 0.18, 0.95)
+    backdrop:Hide()
+    self.flyoutBackdrop = backdrop
+
     for index, entry in ipairs(self.family) do
         local button = CreateRoundButton("ComfyHubFlyout" .. entry.name, UIParent, entry.icon)
         button:SetFrameStrata("DIALOG")
@@ -113,40 +174,82 @@ function CH:CreateFlyout()
     end
 end
 
-function CH:RefreshFlyout()
-    if not self.flyoutButtons or not self.minimapButton then return end
+function CH:UpdateFlyoutBackdrop()
+    local backdrop = self.flyoutBackdrop
+    if not backdrop then return end
 
-    local mainX, mainY = self.minimapButton:GetCenter()
-    local miniX, miniY = Minimap and Minimap:GetCenter()
-    local dx, dy = 0, -1
+    if not self.flyoutShown or not self:IsMinimapBundlingActive() then
+        backdrop:Hide()
+        return
+    end
 
-    if mainX and mainY and miniX and miniY then
-        dx = mainX - miniX
-        dy = mainY - miniY
-        local length = math.sqrt(dx * dx + dy * dy)
-        if length > 0 then
-            dx = dx / length
-            dy = dy / length
+    local left, right, top, bottom
+    local visibleCount = 0
+
+    for _, button in ipairs(self.flyoutButtons or {}) do
+        if button:IsShown() then
+            local l, r, t, b = button:GetLeft(), button:GetRight(), button:GetTop(), button:GetBottom()
+            if l and r and t and b then
+                left = left and math.min(left, l) or l
+                right = right and math.max(right, r) or r
+                top = top and math.max(top, t) or t
+                bottom = bottom and math.min(bottom, b) or b
+                visibleCount = visibleCount + 1
+            end
         end
-
-        -- Expand toward the screen rather than further beyond the minimap edge.
-        if mainX > (UIParent:GetWidth() or 0) * 0.75 then dx = -math.abs(dx) end
-        if mainY > (UIParent:GetHeight() or 0) * 0.75 then dy = -math.abs(dy) end
     end
 
-    for index, button in ipairs(self.flyoutButtons) do
-        local distance = 42 * index
-        button:ClearAllPoints()
-        button:SetPoint("CENTER", self.minimapButton, "CENTER", dx * distance, dy * distance)
+    if visibleCount == 0 or not left or not right or not top or not bottom then
+        backdrop:Hide()
+        return
+    end
 
+    backdrop:ClearAllPoints()
+    backdrop:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left - FLYOUT_PADDING, bottom - FLYOUT_PADDING)
+    backdrop:SetSize((right - left) + FLYOUT_PADDING * 2, (top - bottom) + FLYOUT_PADDING * 2)
+    backdrop:Show()
+end
+
+function CH:RefreshFlyout()
+    if not self.flyoutButtons or not self.minimapButton or not self.db then return end
+
+    if not self:IsMinimapBundlingActive() then
+        self.flyoutShown = false
+        for _, button in ipairs(self.flyoutButtons) do
+            button:Hide()
+        end
+        if self.flyoutBackdrop then self.flyoutBackdrop:Hide() end
+        return
+    end
+
+    local baseAngle = tonumber(self.db.minimap.angle) or 220
+    local direction = math.sin(math.rad(baseAngle)) < 0 and -1 or 1
+    local slot = 0
+
+    for _, button in ipairs(self.flyoutButtons) do
         local installed = self:IsAddonInstalled(button.entry.name)
-        button.icon:SetDesaturated(not installed)
-        button.icon:SetVertexColor(installed and 1 or 0.55, installed and 1 or 0.55, installed and 1 or 0.55)
-        button:SetShown(self.flyoutShown and self.db.minimap.show)
+        if installed then
+            slot = slot + 1
+            local angle = baseAngle + direction * FLYOUT_ANGLE_STEP * slot
+            PositionFromAngle(button, angle)
+            local loaded = self:IsAddOnLoadedCompat(button.entry.name)
+            button.icon:SetDesaturated(not loaded)
+            button.icon:SetVertexColor(loaded and 1 or 0.55, loaded and 1 or 0.55, loaded and 1 or 0.55)
+            button:SetShown(self.flyoutShown and self.db.minimap.show)
+        else
+            button:Hide()
+        end
     end
+
+    self:UpdateFlyoutBackdrop()
 end
 
 function CH:ToggleFlyout()
+    if not self:IsMinimapBundlingActive() then
+        self.flyoutShown = false
+        self:RefreshFlyout()
+        return
+    end
     self.flyoutShown = not self.flyoutShown
     self:RefreshFlyout()
 end
@@ -194,6 +297,7 @@ function CH:InitializeMinimap()
                 local angle = math.deg(math.atan2(cy - my, cx - mx))
                 CH.db.minimap.angle = angle
                 PositionFromAngle(btn, angle)
+                CH:RefreshFlyout()
             end
         end)
     end)
@@ -206,5 +310,6 @@ function CH:InitializeMinimap()
     self.minimapButton = button
     self:CreateFlyout()
     self:UpdateMinimapPosition()
+    self:ApplyMinimapBundling()
     self:RefreshFlyout()
 end
