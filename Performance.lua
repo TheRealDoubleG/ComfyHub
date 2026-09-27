@@ -28,7 +28,47 @@ function CH:SetCPUProfilingRequested(enabled)
     return true
 end
 
-function CH:RefreshMemory()
+local function Now()
+    if type(GetTimePreciseSec) == "function" then
+        local ok, value = pcall(GetTimePreciseSec)
+        if ok and tonumber(value) then return tonumber(value) end
+    end
+    if type(GetTime) == "function" then
+        local ok, value = pcall(GetTime)
+        if ok and tonumber(value) then return tonumber(value) end
+    end
+    return 0
+end
+
+function CH:GetMemoryUpdateInterval()
+    local value = self.db and self.db.performance and tonumber(self.db.performance.memoryUpdateInterval)
+    if value == nil then return 10 end
+    if value < 0 then return 0 end
+    return value
+end
+
+function CH:SetMemoryUpdateInterval(value)
+    if not self.db then return end
+    self.db.performance = self.db.performance or {}
+    self.db.performance.memoryUpdateInterval = math.max(0, tonumber(value) or 0)
+    self._lastMemoryUpdate = nil
+    if self.RefreshMemory then self:RefreshMemory(true) end
+    if self.RefreshOptions then self:RefreshOptions() end
+end
+
+function CH:RefreshMemory(force)
+    local interval = self:GetMemoryUpdateInterval()
+    local now = Now()
+
+    if not force then
+        if interval <= 0 then return self.totalMemoryKB or 0 end
+        if self._lastMemoryUpdate and now < self._lastMemoryUpdate + interval then
+            return self.totalMemoryKB or 0
+        end
+    end
+
+    self._lastMemoryUpdate = now
+
     if type(UpdateAddOnMemoryUsage) == "function" then
         pcall(UpdateAddOnMemoryUsage)
     end
@@ -143,9 +183,9 @@ function CH:GetCPUPercent(name)
     return self.cpuPercent and self.cpuPercent[name] or nil
 end
 
-function CH:RefreshData()
+function CH:RefreshData(forceMemory)
     self:BuildAddonList()
-    self:RefreshMemory()
+    self:RefreshMemory(forceMemory and true or false)
     self:RefreshCPU()
     if self.RefreshOptions then self:RefreshOptions() end
     if self.RefreshFlyout then self:RefreshFlyout() end
@@ -153,5 +193,6 @@ end
 
 function CH:InitializePerformance()
     self.cpuPercent = {}
-    self:RefreshMemory()
+    self._lastMemoryUpdate = nil
+    self:RefreshMemory(true)
 end
