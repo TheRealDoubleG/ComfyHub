@@ -352,7 +352,7 @@ function CH:InitializeOptions()
     filterLabel:SetPoint("TOPLEFT", 345, -8)
     filterLabel:SetText(self:T("FILTER"))
 
-    self.addonFilterDropdown = CreateDropdown(addons, 380, 9, 150,
+    self.addonFilterDropdown = CreateDropdown(addons, 380, -21, 150,
         function()
             return {
                 {value="all", text=CH:T("FILTER_ALL")},
@@ -369,7 +369,7 @@ function CH:InitializeOptions()
     sortLabel:SetPoint("TOPLEFT", 585, -8)
     sortLabel:SetText(self:T("SORT"))
 
-    self.addonSortDropdown = CreateDropdown(addons, 615, 9, 180,
+    self.addonSortDropdown = CreateDropdown(addons, 615, -21, 180,
         function()
             return {
                 {value="suite", text=CH:T("SORT_SUITE")},
@@ -544,7 +544,7 @@ function CH:InitializeOptions()
     memoryIntervalLabel:SetPoint("TOPLEFT", 20, -225)
     memoryIntervalLabel:SetText(self:T("MEMORY_UPDATE"))
 
-    self.memoryIntervalDropdown = CreateDropdown(perf, 180, -208, 170,
+    self.memoryIntervalDropdown = CreateDropdown(perf, 180, -238, 170,
         function()
             return {
                 {value=0, text=CH:T("UPDATE_MANUAL")},
