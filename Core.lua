@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.6"
+CH.version = "0.7"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -29,6 +29,7 @@ local defaults = {
         show = true,
         locked = false,
         angle = 220,
+        bundleSuiteIcons = true,
     },
     performance = {
         cpuProfilingRequested = false,
@@ -136,18 +137,34 @@ eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 eventFrame:SetScript("OnEvent", function(_, event, arg1)
     if event == "ADDON_LOADED" then
-        if arg1 ~= CH.name then return end
-        CH:InitializeDB()
-        if CH.InitializeAddonManager then CH:InitializeAddonManager() end
-        if CH.InitializePerformance then CH:InitializePerformance() end
-        if CH.InitializeDebug then CH:InitializeDebug() end
-        if CH.InstallLuaErrorCapture then CH:InstallLuaErrorCapture() end
-        if CH.InitializeMinimap then CH:InitializeMinimap() end
-        if CH.InitializeOptions then CH:InitializeOptions() end
+        if arg1 == CH.name then
+            CH:InitializeDB()
+            if CH.InitializeAddonManager then CH:InitializeAddonManager() end
+            if CH.InitializePerformance then CH:InitializePerformance() end
+            if CH.InitializeDebug then CH:InitializeDebug() end
+            if CH.InstallLuaErrorCapture then CH:InstallLuaErrorCapture() end
+            if CH.InitializeMinimap then CH:InitializeMinimap() end
+            if CH.InitializeOptions then CH:InitializeOptions() end
+            if CH.ApplyMinimapBundling then CH:ApplyMinimapBundling() end
+            return
+        end
+
+        if CH.db and CH.family then
+            for _, entry in ipairs(CH.family) do
+                if entry.name == arg1 then
+                    if CH.ApplyMinimapBundling then CH:ApplyMinimapBundling() end
+                    if CH.RefreshFlyout then CH:RefreshFlyout() end
+                    break
+                end
+            end
+        end
     elseif event == "PLAYER_LOGIN" then
         if CH.InstallLuaErrorCapture then CH:InstallLuaErrorCapture() end
         if CH.RefreshData then CH:RefreshData() end
+        if CH.ApplyMinimapBundling then CH:ApplyMinimapBundling() end
+        if CH.RefreshFlyout then CH:RefreshFlyout() end
     elseif event == "PLAYER_ENTERING_WORLD" then
         if CH.RefreshData then CH:RefreshData() end
+        if CH.ApplyMinimapBundling then CH:ApplyMinimapBundling() end
     end
 end)
