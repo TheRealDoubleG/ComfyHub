@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.10 – Beta**  
+**Version 0.11 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -23,7 +23,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
   - **Red:** an explicit load or dependency problem was detected.
 - Shows per-addon memory usage and total addon memory.
 - RAM sampling is throttled instead of forcing WoW's addon-memory update every second; choose manual-only, 5 s, 10 s or 30 s in Performance.
-- Optional CPU profiling support when the WoW client exposes addon CPU profiling.
+- Native WoW Forever C_AddOnProfiler support with current, recent-average, peak and encounter CPU time in milliseconds; no scriptProfile toggle is required.
 - Changes can be prepared first and applied with a single **Apply & Reload** action.
 - Central ComfyHub minimap button.
 - Left click on ComfyHub toggles a compact minimap-edge flyout for **ComfyOnPoint**, **ComfyBar**, **ComfyCC** and **ComfyMacro**.
@@ -44,6 +44,13 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - **ComfyCC** – cooldown countdown numbers.
 - **ComfyOnPoint** – cursor-following tooltip improvements.
 - **ComfyMacro** – guided macro builder and assistant.
+- **ComfyProfiles** – central Suite profile coordinator.
+- **ComfyKey** – keybinding profile manager.
+- **ComfyEnemyBar** – lightweight enemy nameplate information.
+- **ComfyPanel** – compact information panel.
+- **ComfyBag** – unified searchable normal inventory.
+- **ComfyMog** – transmog collection tooltip helper.
+- **ComfyXP** – XP progress and session pace bar.
 
 ## Important version-status note
 
@@ -88,3 +95,8 @@ ComfyHub cannot place text directly into the operating system clipboard; WoW req
 ## ComfyMacro integration
 
 ComfyHub 0.6 recognizes **ComfyMacro** as a Comfy Suite addon and includes it in the suite page and minimap flyout.
+
+
+## Native Forever profiler
+
+ComfyHub 0.11 uses the WoW Forever C_AddOnProfiler API when available. The Performance page shows current tick time, recent average, peak and encounter average in milliseconds for loaded addons. The older scriptProfile CVar is no longer the normal ComfyHub CPU path.
