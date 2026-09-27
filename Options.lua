@@ -3,7 +3,7 @@ local CH = ComfyHub
 
 local controls = {}
 local currentPage = 1
-local ROWS_PER_PAGE = 12
+local ROWS_PER_PAGE = 16
 
 local STATUS_COLORS = {
     green = {0.20, 1.00, 0.20},
@@ -56,7 +56,15 @@ local function SelectTab(index)
     local frame = CH.optionsFrame
     if not frame then return end
     for i, tab in ipairs(frame.tabs) do
-        tab:SetEnabled(i ~= index)
+        tab:SetEnabled(true)
+        tab:SetButtonState(i == index and "PUSHED" or "NORMAL", i == index)
+        if tab:GetFontString() then
+            if i == index then
+                tab:GetFontString():SetTextColor(1.00, 0.82, 0.00)
+            else
+                tab:GetFontString():SetTextColor(1.00, 0.82, 0.00)
+            end
+        end
         frame.pages[i]:SetShown(i == index)
     end
 end
@@ -85,9 +93,11 @@ function CH:RefreshAddonRows()
         if addon then
             row:Show()
             row.check:SetChecked(addon.enabled and true or false)
+            row.icon:SetTexture(addon.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+            row.icon:SetDesaturated(not addon.enabled)
             row.name:SetText(addon.title)
             row.version:SetText(addon.version or "-")
-            row.status:SetText("● " .. tostring(addon.statusText or ""))
+            row.status:SetText(tostring(addon.statusText or ""))
             local color = STATUS_COLORS[addon.statusKey] or STATUS_COLORS.unknown
             row.status:SetTextColor(color[1], color[2], color[3])
             row.memory:SetText(FormatMemory(addon.memoryKB))
@@ -192,6 +202,7 @@ function CH:RefreshOptions()
     self:RefreshAddonRows()
     self:RefreshSuiteRows()
     self:RefreshLuaErrorUI(false)
+    if self.RefreshSharedSettingsPage then self:RefreshSharedSettingsPage() end
 end
 
 function CH:InitializeOptions()
@@ -217,6 +228,7 @@ function CH:InitializeOptions()
 
     frame:SetScript("OnMouseDown", function(self) self:Raise() end)
     frame:SetScript("OnDragStart", function(self)
+        if CH:IsOptionsWindowLocked() then return end
         self:Raise()
         self:StartMoving()
     end)
@@ -242,6 +254,7 @@ function CH:InitializeOptions()
         self:T("TAB_PERFORMANCE"),
         self:T("TAB_SUITE"),
         self:T("TAB_DEBUG"),
+        self:GetSharedSettingsTabLabel(),
         self:T("TAB_INFO"),
     }
 
@@ -260,7 +273,7 @@ function CH:InitializeOptions()
 
     local headers = {
         {text = "", x = 20},
-        {text = self:T("COL_ADDON"), x = 58},
+        {text = self:T("COL_ADDON"), x = 78},
         {text = self:T("COL_VERSION"), x = 410},
         {text = self:T("COL_STATUS"), x = 505},
         {text = self:T("COL_MEMORY"), x = 690},
@@ -276,13 +289,20 @@ function CH:InitializeOptions()
     self.addonRows = {}
 
     for i = 1, ROWS_PER_PAGE do
-        local y = -48 - (i - 1) * 39
+        local y = -43 - (i - 1) * 29
         local row = CreateFrame("Frame", nil, addons)
         row:SetPoint("TOPLEFT", 10, y)
-        row:SetSize(860, 34)
+        row:SetSize(860, 27)
+
+        local separator = row:CreateTexture(nil, "BACKGROUND")
+        separator:SetPoint("BOTTOMLEFT", 4, 0)
+        separator:SetPoint("BOTTOMRIGHT", -4, 0)
+        separator:SetHeight(1)
+        separator:SetColorTexture(1, 1, 1, 0.05)
 
         local check = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
-        check:SetPoint("LEFT", 8, 0)
+        check:SetSize(26, 26)
+        check:SetPoint("LEFT", 6, 0)
         check:SetScript("OnClick", function(self)
             local parent = self:GetParent()
             local addon = parent and parent._addon
@@ -293,9 +313,15 @@ function CH:InitializeOptions()
         end)
         row.check = check
 
+        local icon = row:CreateTexture(nil, "ARTWORK")
+        icon:SetSize(20, 20)
+        icon:SetPoint("LEFT", 38, 0)
+        icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+        row.icon = icon
+
         local name = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-        name:SetPoint("LEFT", 48, 0)
-        name:SetWidth(340)
+        name:SetPoint("LEFT", 68, 0)
+        name:SetWidth(320)
         name:SetJustifyH("LEFT")
         row.name = name
 
@@ -434,22 +460,11 @@ function CH:InitializeOptions()
         }
     end
 
-    CreateCheck(suite, self:T("MINIMAP_SHOW"), 20, -365,
-        function() return CH.db.minimap.show end,
-        function(v)
-            CH.db.minimap.show = v
-            CH:UpdateMinimapPosition()
-            CH:ApplyMinimapBundling()
-            CH:RefreshFlyout()
-        end)
-
-    CreateCheck(suite, self:T("MINIMAP_BUNDLE"), 20, -405,
-        function() return CH.db.minimap.bundleSuiteIcons ~= false end,
-        function(v) CH:SetMinimapBundling(v) end)
-
-    CreateCheck(suite, self:T("MINIMAP_LOCK"), 20, -445,
-        function() return CH.db.minimap.locked end,
-        function(v) CH.db.minimap.locked = v end)
+    local suiteNote = suite:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    suiteNote:SetPoint("TOPLEFT", 20, -405)
+    suiteNote:SetWidth(760)
+    suiteNote:SetJustifyH("LEFT")
+    suiteNote:SetText("Minimap- und Fensteroptionen befinden sich einheitlich im Reiter " .. self:GetSharedSettingsTabLabel() .. ".")
 
     -- Debug / Lua errors
     local debugPage = frame.pages[4]
@@ -531,8 +546,12 @@ function CH:InitializeOptions()
         CH:ClearLuaErrors()
     end)
 
+    -- Shared Settings
+    local settingsPage = frame.pages[5]
+    self:BuildSharedSettingsPage(settingsPage)
+
     -- Info
-    local infoPage = frame.pages[5]
+    local infoPage = frame.pages[6]
 
     local ititle = infoPage:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     ititle:SetPoint("TOPLEFT", 20, -10)
@@ -627,22 +646,25 @@ function CH:InitializeOptions()
     InfoRow(self:T("INFO_COMMANDS"), "/comfyhub  ·  /ch", -328)
 
     local notice = infoBox:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    notice:SetPoint("TOPLEFT", 28, -360)
+    notice:SetPoint("TOPLEFT", 28, -345)
     notice:SetWidth(620)
+    notice:SetHeight(42)
     notice:SetJustifyH("LEFT")
+    notice:SetJustifyV("TOP")
     notice:SetText(self:T("INFO_NOTICE"))
 
     local copyright = infoBox:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    copyright:SetPoint("BOTTOMLEFT", 28, 68)
+    copyright:SetPoint("BOTTOMLEFT", 28, 48)
     copyright:SetText("© 2026 TheRealDoubleG")
 
     local thanks = infoBox:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    thanks:SetPoint("BOTTOMLEFT", 28, 28)
+    thanks:SetPoint("BOTTOMLEFT", 28, 16)
     thanks:SetWidth(620)
     thanks:SetJustifyH("LEFT")
     thanks:SetText(self:T("INFO_THANKS"))
 
     frame:SetScript("OnShow", function()
+        CH:ApplySharedWindowSettings()
         CH:RefreshData()
     end)
 
@@ -658,6 +680,7 @@ function CH:InitializeOptions()
         end
     end)
 
+    self:ApplySharedWindowSettings()
     SelectTab(1)
     self:RefreshOptions()
 end
