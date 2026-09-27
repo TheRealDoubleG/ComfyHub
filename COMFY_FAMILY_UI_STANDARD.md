@@ -2,7 +2,7 @@
 
 **Standard version: 2**  
 **Maintainer: TheRealDoubleG**  
-**Applies to:** ComfyOnPoint, ComfyBar, ComfyCC, ComfyMacro, ComfyHub and all future Comfy Suite addons.
+**Applies to:** ComfyHub, ComfyOnPoint, ComfyBar, ComfyCC, ComfyMacro, ComfyEnemyBar, ComfyPanel, ComfyBag, ComfyMog, ComfyXP, ComfyProfiles, ComfyKey and all future Comfy Suite addons.
 
 This document is the visual and structural baseline for the addon family. Individual addons may have different feature tabs and window sizes when their content requires it, but they should remain immediately recognizable as part of the same suite.
 
