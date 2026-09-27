@@ -1,5 +1,12 @@
 # ComfyHub Changelog
 
+## 0.12 Beta – 27.09.2026
+- Replaced the circular Suite minimap flyout with a compact 2-column grid.
+- Flyout now opens beside the minimap toward the center of the screen.
+- Removed the oversized backdrop that could cover much of the minimap.
+- Installed Suite shortcuts are packed tightly without empty slots.
+
+
 ## 0.11 Beta – 27.09.2026
 - Switched the normal CPU path to WoW Forever's native C_AddOnProfiler API.
 - Added current, recent-average, peak and encounter CPU time columns in milliseconds.
