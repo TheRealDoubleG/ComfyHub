@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.16 – Beta**  
+**Version 0.17 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -41,6 +41,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 
 - **ComfyHub** – central addon manager and minimap hub.
 - **ComfyBar** – customizable utility bars.
+- **ComfyBattleText** – customizable scrolling combat text and combat notifications.
 - **ComfyCC** – cooldown countdown numbers.
 - **ComfyOnPoint** – cursor-following tooltip improvements.
 - **ComfyMacro** – guided macro builder and assistant.
