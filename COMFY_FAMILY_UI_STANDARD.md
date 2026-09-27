@@ -2,7 +2,7 @@
 
 **Standard version: 1**  
 **Maintainer: TheRealDoubleG**  
-**Applies to:** OnPoint, ComfyBar, ComfyCC, ComfyHub and all future Comfy Suite addons.
+**Applies to:** ComfyOnPoint, ComfyBar, ComfyCC, ComfyHub and all future Comfy Suite addons.
 
 This document is the visual and structural baseline for the addon family. Individual addons may have different feature tabs and window sizes when their content requires it, but they should remain immediately recognizable as part of the same suite.
 
@@ -38,7 +38,7 @@ Every addon must provide the same information structure:
 15. Copyright: **© 2026 TheRealDoubleG**.
 16. Footer: thanks for using the addon and an invitation to send feedback/bug reports via Discord.
 
-The standard Info panel is **680×455**, positioned at **20, -52** inside the Info page. Standard text widths and row positions follow the OnPoint/ComfyBar reference implementation.
+The standard Info panel is **680×455**, positioned at **20, -52** inside the Info page. Standard text widths and row positions follow the ComfyOnPoint/ComfyBar reference implementation.
 
 ## Family metadata
 

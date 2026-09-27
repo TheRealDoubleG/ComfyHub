@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.2"
+CH.version = "0.3"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -18,7 +18,7 @@ CH.pendingChanges = CH.pendingChanges or {}
 CH.flyoutShown = false
 
 CH.family = {
-    {name = "OnPoint", icon = "Interface\\Icons\\INV_Misc_Spyglass_03"},
+    {name = "ComfyOnPoint", icon = "Interface\\Icons\\INV_Misc_Spyglass_03"},
     {name = "ComfyBar", icon = "Interface\\Icons\\INV_Misc_Bag_10"},
     {name = "ComfyCC", icon = "Interface\\Icons\\Spell_Holy_BorrowedTime"},
 }

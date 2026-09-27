@@ -1,5 +1,12 @@
 # ComfyHub Changelog
 
+## 0.3 Beta – 27.09.2026
+- Updated the Comfy Suite integration from OnPoint to **ComfyOnPoint**.
+- The ComfyHub minimap flyout now opens ComfyOnPoint.
+- The Comfy Suite tab now lists ComfyOnPoint.
+- Updated the family UI standard and documentation to the new addon name.
+
+
 ## 0.2 Beta – 27.09.2026
 - Established ComfyHub as the reference implementation for the shared Comfy Suite UI standard.
 - Standardized tab geometry and Info-tab structure with OnPoint, ComfyBar and ComfyCC.

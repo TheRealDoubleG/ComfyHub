@@ -1,13 +1,13 @@
 # ComfyHub
 
-**Version 0.2 – Beta**  
+**Version 0.3 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
 
 ComfyHub is the central addon manager, performance overview and minimap hub for the Comfy Suite on WoW Forever.
 
-## 0.2 Beta foundation
+## 0.3 Beta foundation
 
 - Lists installed addons with enable/disable checkboxes.
 - Shows installed addon version and WoW interface compatibility.
@@ -19,7 +19,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - Optional CPU profiling support when the WoW client exposes addon CPU profiling.
 - Changes can be prepared first and applied with a single **Apply & Reload** action.
 - Central ComfyHub minimap button.
-- Left click on ComfyHub toggles a small flyout for **OnPoint**, **ComfyBar** and **ComfyCC**.
+- Left click on ComfyHub toggles a small flyout for **ComfyOnPoint**, **ComfyBar** and **ComfyCC**.
 - Right click on ComfyHub opens the manager.
 - Flyout buttons open the corresponding Comfy addon settings when that addon is loaded.
 - German UI on a German client, English otherwise.
@@ -30,7 +30,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - **ComfyHub** – central addon manager and minimap hub.
 - **ComfyBar** – customizable utility bars.
 - **ComfyCC** – cooldown countdown numbers.
-- **OnPoint** – cursor-following tooltip improvements.
+- **ComfyOnPoint** – cursor-following tooltip improvements.
 
 ## Important version-status note
 
@@ -52,3 +52,8 @@ ComfyHub changes only addon/UI configuration and presentation. It does not autom
 ComfyHub is the reference implementation for the shared Comfy Suite menu and Info-tab design. Current and future suite addons should use the same Blizzard-style window treatment, top-tab navigation, persistent window position, Info layout, Comfy Suite badge, compatibility details, author/Discord/GitHub fields and footer styling.
 
 See `COMFY_FAMILY_UI_STANDARD.md` for the canonical family standard.
+
+
+## ComfyOnPoint integration
+
+ComfyHub 0.3 uses **ComfyOnPoint** as the tooltip addon name throughout the suite. The minimap flyout and Comfy Suite page open the renamed addon directly.
