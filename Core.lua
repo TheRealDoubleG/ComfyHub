@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.8"
+CH.version = "0.9"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -33,6 +33,11 @@ local defaults = {
     },
     performance = {
         cpuProfilingRequested = false,
+        memoryUpdateInterval = 10,
+    },
+    addons = {
+        filter = "all",
+        sort = "suite",
     },
     debug = {
         maxLuaErrors = 50,
@@ -134,7 +139,7 @@ SlashCmdList.COMFYHUB = function(msg)
     if msg == "flyout" then
         if CH.ToggleFlyout then CH:ToggleFlyout() end
     elseif msg == "refresh" then
-        if CH.RefreshData then CH:RefreshData() end
+        if CH.RefreshData then CH:RefreshData(true) end
     else
         CH:OpenOptions()
     end
@@ -170,11 +175,11 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
         end
     elseif event == "PLAYER_LOGIN" then
         if CH.InstallLuaErrorCapture then CH:InstallLuaErrorCapture() end
-        if CH.RefreshData then CH:RefreshData() end
+        if CH.RefreshData then CH:RefreshData(true) end
         if CH.ApplyMinimapBundling then CH:ApplyMinimapBundling() end
         if CH.RefreshFlyout then CH:RefreshFlyout() end
     elseif event == "PLAYER_ENTERING_WORLD" then
-        if CH.RefreshData then CH:RefreshData() end
+        if CH.RefreshData then CH:RefreshData(true) end
         if CH.ApplyMinimapBundling then CH:ApplyMinimapBundling() end
     end
 end)
