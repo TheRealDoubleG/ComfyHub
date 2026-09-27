@@ -219,8 +219,21 @@ function CH:RefreshAddonPreviewRows(resetPage)
 end
 
 function CH:ApplyAddonManagerViewMode()
-    if not self.addonPreviewFrame then return end
+    if not self.addonPreviewFrame or not self.addonPage then return end
     local preview = self:IsAddonManagerPreviewEnabled()
+
+    -- The preview is an alternate layout, not an overlay. Hide every standard
+    -- Addons-page child/region while it is active so the old view cannot bleed
+    -- through behind transparent controls.
+    for _, child in ipairs({self.addonPage:GetChildren()}) do
+        if child ~= self.addonPreviewFrame then
+            child:SetShown(not preview)
+        end
+    end
+    for _, region in ipairs({self.addonPage:GetRegions()}) do
+        region:SetShown(not preview)
+    end
+
     self.addonPreviewFrame:SetShown(preview)
     if preview then self:RefreshAddonPreviewRows(false) end
 end
@@ -469,6 +482,7 @@ function CH:InitializeOptions()
 
     -- Addons
     local addons = frame.pages[1]
+    self.addonPage = addons
 
     local searchLabel = addons:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     searchLabel:SetPoint("TOPLEFT", 20, -8)
@@ -665,7 +679,7 @@ function CH:InitializeOptions()
         tile = true, tileSize = 16, edgeSize = 12,
         insets = {left = 4, right = 4, top = 4, bottom = 4},
     })
-    preview:SetBackdropColor(0.025, 0.025, 0.025, 0.98)
+    preview:SetBackdropColor(0.025, 0.025, 0.025, 1.00)
     preview:SetBackdropBorderColor(0.48, 0.38, 0.18, 1)
     preview:Hide()
     self.addonPreviewFrame = preview
@@ -675,7 +689,7 @@ function CH:InitializeOptions()
     previewTitle:SetText("ComfyHub  ·  " .. self:T("TAB_ADDONS"))
     previewTitle:SetTextColor(1.00, 0.82, 0.00)
 
-    self.previewFilterDropdown = CreateDropdown(preview, 4, -35, 130,
+    self.previewFilterDropdown = CreateDropdown(preview, 10, -35, 120,
         function()
             return {
                 {value="all", text=CH:T("FILTER_ALL")},
@@ -693,8 +707,8 @@ function CH:InitializeOptions()
         end)
 
     self.previewSearchBox = CreateFrame("EditBox", nil, preview, "InputBoxTemplate")
-    self.previewSearchBox:SetPoint("TOPLEFT", 165, -30)
-    self.previewSearchBox:SetSize(250, 28)
+    self.previewSearchBox:SetPoint("TOPLEFT", 175, -31)
+    self.previewSearchBox:SetSize(300, 26)
     self.previewSearchBox:SetAutoFocus(false)
     if self.previewSearchBox.SetTextInsets then
         self.previewSearchBox:SetTextInsets(24, 8, 0, 0)
@@ -711,7 +725,7 @@ function CH:InitializeOptions()
     searchIcon:SetPoint("LEFT", 6, 0)
     searchIcon:SetTexture("Interface\\Common\\UI-Searchbox-Icon")
 
-    self.previewSortDropdown = CreateDropdown(preview, 425, -35, 175,
+    self.previewSortDropdown = CreateDropdown(preview, 490, -35, 165,
         function()
             return {
                 {value="suite", text=CH:T("SORT_SUITE")},
@@ -727,7 +741,7 @@ function CH:InitializeOptions()
             CH:RefreshAddonPreviewRows(true)
         end)
 
-    CreateButton(preview, self:T("PREVIEW_PROFILES"), 750, -29, 115, function()
+    CreateButton(preview, self:T("PREVIEW_PROFILES"), 745, -30, 125, function()
         CH:SelectOptionsTab(5)
     end)
 
