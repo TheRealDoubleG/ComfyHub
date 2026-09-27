@@ -403,7 +403,7 @@ function CH:InitializeOptions()
     suiteHint:SetText(self:T("SUITE_HINT"))
 
     self.suiteRows = {}
-    local suiteNames = {"ComfyOnPoint", "ComfyBar", "ComfyCC"}
+    local suiteNames = {"ComfyOnPoint", "ComfyBar", "ComfyCC", "ComfyMacro"}
 
     for i, name in ipairs(suiteNames) do
         local y = -115 - (i - 1) * 70

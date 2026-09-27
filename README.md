@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.5 – Beta**  
+**Version 0.6 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -19,7 +19,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - Optional CPU profiling support when the WoW client exposes addon CPU profiling.
 - Changes can be prepared first and applied with a single **Apply & Reload** action.
 - Central ComfyHub minimap button.
-- Left click on ComfyHub toggles a small flyout for **ComfyOnPoint**, **ComfyBar** and **ComfyCC**.
+- Left click on ComfyHub toggles a small flyout for **ComfyOnPoint**, **ComfyBar**, **ComfyCC** and **ComfyMacro**.
 - Right click on ComfyHub opens the manager.
 - Flyout buttons open the corresponding Comfy addon settings when that addon is loaded.
 - German UI on a German client, English otherwise.
@@ -31,6 +31,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - **ComfyBar** – customizable utility bars.
 - **ComfyCC** – cooldown countdown numbers.
 - **ComfyOnPoint** – cursor-following tooltip improvements.
+- **ComfyMacro** – guided macro builder and assistant.
 
 ## Important version-status note
 
@@ -61,7 +62,7 @@ ComfyHub 0.3 uses **ComfyOnPoint** as the tooltip addon name throughout the suit
 
 ## Lua error tools
 
-ComfyHub 0.5 includes a dedicated **Debug** tab:
+ComfyHub 0.6 includes a dedicated **Debug** tab:
 
 - Toggle WoW's Lua error popups on or off from inside ComfyHub.
 - Capture up to 50 Lua errors from the current session.
@@ -70,3 +71,8 @@ ComfyHub 0.5 includes a dedicated **Debug** tab:
 - Clear the current session log at any time.
 
 ComfyHub cannot place text directly into the operating system clipboard; WoW requires the user to press Ctrl+C after selecting the text.
+
+
+## ComfyMacro integration
+
+ComfyHub 0.6 recognizes **ComfyMacro** as a Comfy Suite addon and includes it in the suite page and minimap flyout.

@@ -1,5 +1,11 @@
 # ComfyHub Changelog
 
+## 0.6 Beta – 27.09.2026
+- Added **ComfyMacro** to the Comfy Suite registry.
+- Added ComfyMacro to the Comfy Suite page and central minimap flyout.
+- Updated the family UI standard to include ComfyMacro.
+
+
 ## 0.5 Beta – 27.09.2026
 - Hardened Lua error capture so the logger cannot recursively trigger itself.
 - Starts capture during ComfyHub loading and re-checks the handler after login.

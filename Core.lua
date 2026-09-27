@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.5"
+CH.version = "0.6"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -21,6 +21,7 @@ CH.family = {
     {name = "ComfyOnPoint", icon = "Interface\\Icons\\INV_Misc_Spyglass_03"},
     {name = "ComfyBar", icon = "Interface\\Icons\\INV_Misc_Bag_10"},
     {name = "ComfyCC", icon = "Interface\\Icons\\Spell_Holy_BorrowedTime"},
+    {name = "ComfyMacro", icon = "Interface\\Icons\\INV_Misc_Note_01"},
 }
 
 local defaults = {
