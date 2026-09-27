@@ -1,5 +1,17 @@
 # ComfyHub Changelog
 
+## 0.8 Beta – 27.09.2026
+- Added the suite-wide **Settings** tab immediately before Info.
+- Added standalone per-character, account and named custom saved profiles, including copying another known character profile as a template.
+- Added settings-window lock, 10–100% window opacity, optional Blizzard border, minimalist black/grey background mode and independent background opacity.
+- Moved ComfyHub minimap and suite-icon bundling controls into Settings.
+- Reworked the Addons page into a tighter details-list layout with addon icons and subtle row separators.
+- Removed the unsupported status glyph that appeared as a square before Compatible.
+- Hardened CPU profiling across legacy and C_AddOns APIs and added clear collecting/unavailable states.
+- Changed active tabs to use a selected/pushed state instead of looking disabled.
+- Cleaned Info footer spacing.
+
+
 ## 0.7 Beta – 27.09.2026
 - Reworked the minimap flyout into a tighter arc around the minimap edge.
 - Added a subtle dark flyout background with a thin bronze WoW-style border.
