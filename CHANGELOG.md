@@ -1,5 +1,12 @@
 # ComfyHub Changelog
 
+## 0.14 Beta – 28.09.2026
+- Added ComfyGatherer and ComfyKills to the Suite registry and compact minimap flyout.
+- Added ComfyData and ComfyDataVault to the Suite registry as background services.
+- Compacted the Suite page so the expanded addon family still fits cleanly.
+- Background data services no longer show an unusable Open button.
+
+
 ## 0.13 Beta – 27.09.2026
 - Fixed the experimental Addons preview so the old layout no longer shows through behind it.
 - Realigned the preview filter, search, sort and Profiles controls.
