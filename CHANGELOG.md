@@ -1,5 +1,12 @@
 # ComfyHub Changelog
 
+## 0.13 Beta – 27.09.2026
+- Fixed the experimental Addons preview so the old layout no longer shows through behind it.
+- Realigned the preview filter, search, sort and Profiles controls.
+- Fixed Background opacity so 0% fully removes the Comfy window background while the border can remain.
+- Aligned the shared Load / copy control with its profile dropdown.
+
+
 ## 0.12 Beta – 27.09.2026
 - Replaced the circular Suite minimap flyout with a compact 2-column grid.
 - Flyout now opens beside the minimap toward the center of the screen.
