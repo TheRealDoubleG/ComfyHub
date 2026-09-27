@@ -439,10 +439,15 @@ function CH:InitializeOptions()
         function(v)
             CH.db.minimap.show = v
             CH:UpdateMinimapPosition()
+            CH:ApplyMinimapBundling()
             CH:RefreshFlyout()
         end)
 
-    CreateCheck(suite, self:T("MINIMAP_LOCK"), 20, -405,
+    CreateCheck(suite, self:T("MINIMAP_BUNDLE"), 20, -405,
+        function() return CH.db.minimap.bundleSuiteIcons ~= false end,
+        function(v) CH:SetMinimapBundling(v) end)
+
+    CreateCheck(suite, self:T("MINIMAP_LOCK"), 20, -445,
         function() return CH.db.minimap.locked end,
         function(v) CH.db.minimap.locked = v end)
 
