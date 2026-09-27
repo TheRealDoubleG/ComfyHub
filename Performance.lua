@@ -45,29 +45,77 @@ function CH:RefreshMemory()
     return total
 end
 
+function CH:GetAddOnCPUUsageCompat(addon)
+    local getter = GetAddOnCPUUsage
+    if C_AddOns and type(C_AddOns.GetAddOnCPUUsage) == "function" then
+        getter = C_AddOns.GetAddOnCPUUsage
+    end
+    if type(getter) ~= "function" then return nil end
+
+    local candidates = {addon and addon.name, addon and addon.index}
+    for _, candidate in ipairs(candidates) do
+        if candidate ~= nil then
+            local ok, value = pcall(getter, candidate)
+            value = ok and tonumber(value) or nil
+            if value ~= nil then return value end
+        end
+    end
+    return nil
+end
+
 function CH:RefreshCPU()
     if not self:IsCPUProfilingEnabled() then
         self.cpuPercent = {}
         self._cpuPrev = nil
         self._cpuPrevTime = nil
+        self.cpuSampleState = "disabled"
         return false
     end
 
-    if type(UpdateAddOnCPUUsage) ~= "function" or type(GetAddOnCPUUsage) ~= "function" then
+    local updater = UpdateAddOnCPUUsage
+    if C_AddOns and type(C_AddOns.UpdateAddOnCPUUsage) == "function" then
+        updater = C_AddOns.UpdateAddOnCPUUsage
+    end
+
+    local getterAvailable = type(GetAddOnCPUUsage) == "function"
+        or (C_AddOns and type(C_AddOns.GetAddOnCPUUsage) == "function")
+
+    if not getterAvailable then
         self.cpuPercent = {}
+        self.cpuSampleState = "unavailable"
         return false
     end
 
-    pcall(UpdateAddOnCPUUsage)
+    if type(updater) == "function" then pcall(updater) end
 
-    local now = GetTime and GetTime() or 0
+    local now
+    if type(GetTimePreciseSec) == "function" then
+        local ok, value = pcall(GetTimePreciseSec)
+        now = ok and tonumber(value) or nil
+    end
+    if not now and type(GetTime) == "function" then
+        local ok, value = pcall(GetTime)
+        now = ok and tonumber(value) or nil
+    end
+    now = now or 0
+
     local current = {}
+    local anyValue = false
 
     if self.addonList then
         for _, addon in ipairs(self.addonList) do
-            local ok, value = pcall(GetAddOnCPUUsage, addon.index)
-            current[addon.name] = ok and tonumber(value) or 0
+            local value = self:GetAddOnCPUUsageCompat(addon)
+            if value ~= nil then
+                current[addon.name] = value
+                anyValue = true
+            end
         end
+    end
+
+    if not anyValue then
+        self.cpuPercent = {}
+        self.cpuSampleState = "unavailable"
+        return false
     end
 
     self.cpuPercent = self.cpuPercent or {}
@@ -75,10 +123,15 @@ function CH:RefreshCPU()
     if self._cpuPrev and self._cpuPrevTime and now > self._cpuPrevTime then
         local elapsedMs = (now - self._cpuPrevTime) * 1000
         for name, value in pairs(current) do
-            local previous = self._cpuPrev[name] or value
-            local delta = math.max(0, value - previous)
-            self.cpuPercent[name] = elapsedMs > 0 and (delta / elapsedMs) * 100 or 0
+            local previous = self._cpuPrev[name]
+            if previous ~= nil then
+                local delta = math.max(0, value - previous)
+                self.cpuPercent[name] = elapsedMs > 0 and (delta / elapsedMs) * 100 or 0
+            end
         end
+        self.cpuSampleState = "ready"
+    else
+        self.cpuSampleState = "sampling"
     end
 
     self._cpuPrev = current
