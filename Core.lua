@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.10"
+CH.version = "0.11"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -18,10 +18,17 @@ CH.pendingChanges = CH.pendingChanges or {}
 CH.flyoutShown = false
 
 CH.family = {
-    {name = "ComfyOnPoint", icon = "Interface\\Icons\\INV_Misc_Spyglass_03"},
-    {name = "ComfyBar", icon = "Interface\\Icons\\INV_Misc_Bag_10"},
-    {name = "ComfyCC", icon = "Interface\\Icons\\Spell_Holy_BorrowedTime"},
-    {name = "ComfyMacro", icon = "Interface\\Icons\\INV_Misc_Note_01"},
+    {name = "ComfyOnPoint",  icon = "Interface\\Icons\\INV_Misc_Spyglass_03", flyout = true},
+    {name = "ComfyBar",      icon = "Interface\\Icons\\INV_Misc_Bag_10", flyout = true},
+    {name = "ComfyCC",       icon = "Interface\\Icons\\Spell_Holy_BorrowedTime", flyout = true},
+    {name = "ComfyMacro",    icon = "Interface\\Icons\\INV_Misc_Note_01", flyout = true},
+    {name = "ComfyProfiles", icon = "Interface\\Icons\\INV_Misc_Note_03", flyout = true},
+    {name = "ComfyKey",      icon = "Interface\\Icons\\INV_Misc_Key_03", flyout = true},
+    {name = "ComfyEnemyBar", icon = "Interface\\Icons\\Ability_Hunter_SniperShot", flyout = false},
+    {name = "ComfyPanel",    icon = "Interface\\Icons\\INV_Misc_Gear_01", flyout = false},
+    {name = "ComfyBag",      icon = "Interface\\Icons\\INV_Misc_Bag_10", flyout = false},
+    {name = "ComfyMog",      icon = "Interface\\Icons\\INV_Misc_Cape_18", flyout = false},
+    {name = "ComfyXP",       icon = "Interface\\Icons\\INV_Misc_Book_09", flyout = false},
 }
 
 local defaults = {
