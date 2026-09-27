@@ -1,5 +1,12 @@
 # ComfyHub Changelog
 
+## 0.5 Beta – 27.09.2026
+- Hardened Lua error capture so the logger cannot recursively trigger itself.
+- Starts capture during ComfyHub loading and re-checks the handler after login.
+- Improved the copy field scrolling for larger error logs.
+- Added compatibility guards for optional EditBox methods.
+
+
 ## 0.4 Beta – 27.09.2026
 - Added a dedicated Debug tab for Lua errors.
 - Added an in-game toggle for WoW's `scriptErrors` setting.

@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.4 – Beta**  
+**Version 0.5 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -61,7 +61,7 @@ ComfyHub 0.3 uses **ComfyOnPoint** as the tooltip addon name throughout the suit
 
 ## Lua error tools
 
-ComfyHub 0.4 adds a dedicated **Debug** tab:
+ComfyHub 0.5 includes a dedicated **Debug** tab:
 
 - Toggle WoW's Lua error popups on or off from inside ComfyHub.
 - Capture up to 50 Lua errors from the current session.

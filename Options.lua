@@ -160,6 +160,7 @@ function CH:RefreshLuaErrorUI(force)
             if force or not hadFocus then
                 self.luaErrorEditBox:SetText(text)
                 self.luaErrorEditBox:SetCursorPosition(0)
+                self.luaErrorEditBox:SetHeight(math.max(300, 80 + (#(self.luaErrors or {}) * 240)))
             end
         end
     end
@@ -498,7 +499,7 @@ function CH:InitializeOptions()
     edit:SetHeight(3000)
     edit:SetJustifyH("LEFT")
     edit:SetJustifyV("TOP")
-    edit:SetTextInsets(4, 4, 4, 4)
+    if edit.SetTextInsets then edit:SetTextInsets(4, 4, 4, 4) end
     edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
     edit:SetScript("OnTextChanged", function(self, userInput)
         if userInput then

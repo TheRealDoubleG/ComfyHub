@@ -65,8 +65,6 @@ function CH:CaptureLuaError(message)
     while #self.luaErrors > maxErrors do
         table.remove(self.luaErrors, 1)
     end
-
-    if self.RefreshLuaErrorUI then self:RefreshLuaErrorUI(true) end
 end
 
 function CH:GetLuaErrorLogText()
@@ -104,7 +102,8 @@ function CH:InstallLuaErrorCapture()
     local previous = current
     local wrapper
     wrapper = function(message)
-        CH:CaptureLuaError(message)
+        -- Never allow the logger itself to create a recursive error-handler loop.
+        pcall(CH.CaptureLuaError, CH, message)
         if type(previous) == "function" and previous ~= wrapper then
             return previous(message)
         end
