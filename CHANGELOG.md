@@ -1,5 +1,16 @@
 # ComfyHub Changelog
 
+## 0.10 Beta – 27.09.2026
+- Added an optional **experimental compact manager preview** under Settings for local layout comparison.
+- The preview uses an original ComfyHub implementation with Blizzard/Comfy assets only; no Addon Manargl code or artwork is copied.
+- Added a darker compact manager surface with search, filter, sort, profile shortcut, status metrics and dense addon rows.
+- The preview keeps the same ComfyHub addon enable/disable queue, search/filter/sort model, refresh button and Apply & Reload flow.
+- Added compact summary metrics for current sampled CPU, addon RAM, enabled addon count and compatibility-problem count.
+- The standard Explorer-style ComfyHub addon view remains the default and can be restored instantly by unticking the Settings option.
+- Marked the preview as temporary test UI to be removed or redesigned before a public CurseForge release.
+- No Retail/Midnight/Classic-only API or feature was introduced; WoW: Forever remains the only compatibility target.
+
+
 ## 0.9 Beta – 27.09.2026
 - Added addon search across title, folder name, version and addon description.
 - Added list filters for all, enabled, disabled, loaded and problem-state addons.
