@@ -1,5 +1,17 @@
 # ComfyHub Changelog
 
+## 0.9 Beta – 27.09.2026
+- Added addon search across title, folder name, version and addon description.
+- Added list filters for all, enabled, disabled, loaded and problem-state addons.
+- Added sorting by Comfy Suite first, name, memory usage or compatibility status while keeping the compact Explorer-style list.
+- Added row tooltips with addon description, folder name, loaded/enabled state and reported load reason.
+- Optimized RAM sampling so UpdateAddOnMemoryUsage is no longer forced every second while ComfyHub is open.
+- Added configurable RAM refresh cadence: manual only, 5 seconds, 10 seconds or 30 seconds; manual Refresh always forces a fresh sample.
+- Kept the existing WoW: Forever/legacy CPU path instead of depending on Retail/Midnight-only profiler APIs.
+- Documented ComfyHub as a WoW: Forever-only target; Retail/Midnight/Classic are not compatibility targets.
+- Changes were inspired by general addon-manager lessons such as filtering, sorting and memory-update throttling, without copying Addon Manargl code or its multi-client architecture.
+
+
 ## 0.8 Beta – 27.09.2026
 - Added the suite-wide **Settings** tab immediately before Info.
 - Added standalone per-character, account and named custom saved profiles, including copying another known character profile as a template.
