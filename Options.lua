@@ -133,6 +133,38 @@ function CH:RefreshSuiteRows()
     end
 end
 
+function CH:RefreshLuaErrorUI(force)
+    if not self.optionsFrame then return end
+
+    if self.luaErrorStateText then
+        if type(SetCVar) ~= "function" and type(GetCVar) ~= "function" and type(GetCVarBool) ~= "function" then
+            self.luaErrorStateText:SetText(self:T("LUA_ERRORS_UNAVAILABLE"))
+            self.luaErrorStateText:SetTextColor(1.00, 0.25, 0.20)
+        elseif self:IsLuaErrorsEnabled() then
+            self.luaErrorStateText:SetText(self:T("LUA_ERRORS_ENABLED"))
+            self.luaErrorStateText:SetTextColor(0.20, 1.00, 0.20)
+        else
+            self.luaErrorStateText:SetText(self:T("LUA_ERRORS_DISABLED"))
+            self.luaErrorStateText:SetTextColor(1.00, 0.82, 0.00)
+        end
+    end
+
+    if self.luaErrorCountText then
+        self.luaErrorCountText:SetText(string.format(self:T("LUA_COUNT"), #(self.luaErrors or {})))
+    end
+
+    if self.luaErrorEditBox then
+        local text = self:GetLuaErrorLogText()
+        if force or self.luaErrorEditBox:GetText() ~= text then
+            local hadFocus = self.luaErrorEditBox:HasFocus()
+            if force or not hadFocus then
+                self.luaErrorEditBox:SetText(text)
+                self.luaErrorEditBox:SetCursorPosition(0)
+            end
+        end
+    end
+end
+
 function CH:RefreshOptions()
     if not self.optionsFrame or not self.db then return end
 
@@ -158,6 +190,7 @@ function CH:RefreshOptions()
 
     self:RefreshAddonRows()
     self:RefreshSuiteRows()
+    self:RefreshLuaErrorUI(false)
 end
 
 function CH:InitializeOptions()
@@ -207,6 +240,7 @@ function CH:InitializeOptions()
         self:T("TAB_ADDONS"),
         self:T("TAB_PERFORMANCE"),
         self:T("TAB_SUITE"),
+        self:T("TAB_DEBUG"),
         self:T("TAB_INFO"),
     }
 
@@ -411,8 +445,88 @@ function CH:InitializeOptions()
         function() return CH.db.minimap.locked end,
         function(v) CH.db.minimap.locked = v end)
 
+    -- Debug / Lua errors
+    local debugPage = frame.pages[4]
+
+    local dtitle = debugPage:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    dtitle:SetPoint("TOPLEFT", 20, -10)
+    dtitle:SetText(self:T("TAB_DEBUG"))
+
+    self.luaErrorToggle = CreateCheck(debugPage, self:T("LUA_ERRORS_SHOW"), 20, -52,
+        function() return CH:IsLuaErrorsEnabled() end,
+        function(v) CH:SetLuaErrorsEnabled(v) end)
+
+    self.luaErrorStateText = debugPage:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    self.luaErrorStateText:SetPoint("TOPLEFT", 45, -90)
+    self.luaErrorStateText:SetWidth(780)
+    self.luaErrorStateText:SetJustifyH("LEFT")
+
+    local logTitle = debugPage:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    logTitle:SetPoint("TOPLEFT", 20, -130)
+    logTitle:SetText(self:T("LUA_LOG_TITLE"))
+
+    self.luaErrorCountText = debugPage:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    self.luaErrorCountText:SetPoint("TOPRIGHT", -35, -137)
+    self.luaErrorCountText:SetJustifyH("RIGHT")
+
+    local logHint = debugPage:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    logHint:SetPoint("TOPLEFT", 20, -165)
+    logHint:SetWidth(810)
+    logHint:SetJustifyH("LEFT")
+    logHint:SetText(self:T("LUA_LOG_HINT"))
+
+    local logBackdrop = CreateFrame("Frame", nil, debugPage, "BackdropTemplate")
+    logBackdrop:SetPoint("TOPLEFT", 20, -205)
+    logBackdrop:SetSize(820, 305)
+    logBackdrop:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 16,
+        insets = {left = 4, right = 4, top = 4, bottom = 4},
+    })
+    logBackdrop:SetBackdropColor(0.03, 0.03, 0.03, 0.95)
+
+    local scroll = CreateFrame("ScrollFrame", "ComfyHubLuaErrorScrollFrame", logBackdrop, "UIPanelScrollFrameTemplate")
+    scroll:SetPoint("TOPLEFT", 10, -10)
+    scroll:SetPoint("BOTTOMRIGHT", -30, 10)
+
+    local edit = CreateFrame("EditBox", nil, scroll)
+    edit:SetMultiLine(true)
+    edit:SetAutoFocus(false)
+    edit:SetFontObject(ChatFontNormal)
+    edit:SetWidth(765)
+    edit:SetHeight(3000)
+    edit:SetJustifyH("LEFT")
+    edit:SetJustifyV("TOP")
+    edit:SetTextInsets(4, 4, 4, 4)
+    edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    edit:SetScript("OnTextChanged", function(self, userInput)
+        if userInput then
+            local expected = CH:GetLuaErrorLogText()
+            if self:GetText() ~= expected then
+                self:SetText(expected)
+                self:HighlightText()
+            end
+        end
+    end)
+    scroll:SetScrollChild(edit)
+
+    self.luaErrorEditBox = edit
+    self.luaErrorScrollFrame = scroll
+
+    CreateButton(debugPage, self:T("LUA_SELECT_ALL"), 20, -530, 150, function()
+        if CH.luaErrorEditBox then
+            CH.luaErrorEditBox:SetFocus()
+            CH.luaErrorEditBox:HighlightText()
+        end
+    end)
+
+    CreateButton(debugPage, self:T("LUA_CLEAR"), 185, -530, 150, function()
+        CH:ClearLuaErrors()
+    end)
+
     -- Info
-    local infoPage = frame.pages[4]
+    local infoPage = frame.pages[5]
 
     local ititle = infoPage:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     ititle:SetPoint("TOPLEFT", 20, -10)

@@ -1,13 +1,13 @@
 # ComfyHub
 
-**Version 0.3 – Beta**  
+**Version 0.4 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
 
 ComfyHub is the central addon manager, performance overview and minimap hub for the Comfy Suite on WoW Forever.
 
-## 0.3 Beta foundation
+## 0.4 Beta foundation
 
 - Lists installed addons with enable/disable checkboxes.
 - Shows installed addon version and WoW interface compatibility.
@@ -57,3 +57,16 @@ See `COMFY_FAMILY_UI_STANDARD.md` for the canonical family standard.
 ## ComfyOnPoint integration
 
 ComfyHub 0.3 uses **ComfyOnPoint** as the tooltip addon name throughout the suite. The minimap flyout and Comfy Suite page open the renamed addon directly.
+
+
+## Lua error tools
+
+ComfyHub 0.4 adds a dedicated **Debug** tab:
+
+- Toggle WoW's Lua error popups on or off from inside ComfyHub.
+- Capture up to 50 Lua errors from the current session.
+- View all captured errors in one scrollable text field.
+- Use **Select all** and then **Ctrl+C** to copy the complete log for bug reports.
+- Clear the current session log at any time.
+
+ComfyHub cannot place text directly into the operating system clipboard; WoW requires the user to press Ctrl+C after selecting the text.

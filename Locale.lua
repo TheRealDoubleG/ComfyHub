@@ -8,6 +8,7 @@ local EN = {
     TAB_ADDONS = "Addons",
     TAB_PERFORMANCE = "Performance",
     TAB_SUITE = "Comfy Suite",
+    TAB_DEBUG = "Debug",
     TAB_INFO = "Info",
 
     COL_ADDON = "Addon",
@@ -36,6 +37,18 @@ local EN = {
     CPU_UNAVAILABLE = "CPU profiling is not available or not enabled.",
     PERFORMANCE_HINT = "RAM is sampled from WoW's addon memory counters. CPU is shown as an approximate short-window percentage when profiling is available.",
 
+    LUA_ERRORS_SHOW = "Show Lua error popups",
+    LUA_ERRORS_ENABLED = "Lua error popups: ON",
+    LUA_ERRORS_DISABLED = "Lua error popups: OFF",
+    LUA_ERRORS_UNAVAILABLE = "Lua error control is unavailable on this client.",
+    LUA_LOG_TITLE = "Lua error log",
+    LUA_LOG_HINT = "ComfyHub keeps up to 50 Lua errors from the current session. Click Select all, then press Ctrl+C to copy the complete log.",
+    LUA_NO_ERRORS = "No Lua errors captured in this session.",
+    LUA_SELECT_ALL = "Select all",
+    LUA_CLEAR = "Clear log",
+    LUA_COUNT = "Captured errors: %d",
+    LUA_CAPTURE_UNAVAILABLE = "Lua error capture is unavailable on this client.",
+
     SUITE_HINT = "ComfyHub can open the settings of loaded Comfy Suite addons. The minimap flyout uses the same entries.",
     OPEN = "Open",
     NOT_INSTALLED = "Not installed",
@@ -49,7 +62,6 @@ local EN = {
     MINIMAP_SHOW = "Show ComfyHub minimap button",
     MINIMAP_LOCK = "Lock ComfyHub minimap button",
 
-    INFO_TITLE = "ComfyHub",
     INFO_TITLE = "ComfyHub",
     INFO_VERSION = "Version",
     INFO_BUILD_DATE = "Build date",
@@ -77,6 +89,7 @@ local DE = {
     TAB_ADDONS = "Addons",
     TAB_PERFORMANCE = "Leistung",
     TAB_SUITE = "Comfy Suite",
+    TAB_DEBUG = "Debug",
     TAB_INFO = "Info",
 
     COL_ADDON = "Addon",
@@ -104,6 +117,18 @@ local DE = {
     CPU_RELOAD_HINT = "Eine Änderung der CPU-Messung benötigt einen UI-Neustart. Die Messung selbst erzeugt etwas zusätzlichen Aufwand.",
     CPU_UNAVAILABLE = "CPU-Messung ist nicht verfügbar oder nicht aktiviert.",
     PERFORMANCE_HINT = "RAM wird über WoWs Addon-Speicherzähler erfasst. CPU wird – falls verfügbar – als ungefährer Wert über ein kurzes Messfenster angezeigt.",
+
+    LUA_ERRORS_SHOW = "Lua-Fehlerfenster anzeigen",
+    LUA_ERRORS_ENABLED = "Lua-Fehlerfenster: AN",
+    LUA_ERRORS_DISABLED = "Lua-Fehlerfenster: AUS",
+    LUA_ERRORS_UNAVAILABLE = "Die Lua-Fehlersteuerung ist auf diesem Client nicht verfügbar.",
+    LUA_LOG_TITLE = "Lua-Fehlerprotokoll",
+    LUA_LOG_HINT = "ComfyHub speichert bis zu 50 Lua-Fehler der aktuellen Sitzung. Klicke Alles markieren und drücke danach Strg+C, um das komplette Protokoll zu kopieren.",
+    LUA_NO_ERRORS = "In dieser Sitzung wurden keine Lua-Fehler erfasst.",
+    LUA_SELECT_ALL = "Alles markieren",
+    LUA_CLEAR = "Protokoll leeren",
+    LUA_COUNT = "Erfasste Fehler: %d",
+    LUA_CAPTURE_UNAVAILABLE = "Das Erfassen von Lua-Fehlern ist auf diesem Client nicht verfügbar.",
 
     SUITE_HINT = "ComfyHub kann die Einstellungen geladener Comfy-Suite-Addons öffnen. Das Minimap-Flyout verwendet dieselben Einträge.",
     OPEN = "Öffnen",

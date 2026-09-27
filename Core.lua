@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.3"
+CH.version = "0.4"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -31,6 +31,9 @@ local defaults = {
     },
     performance = {
         cpuProfilingRequested = false,
+    },
+    debug = {
+        maxLuaErrors = 50,
     },
     optionsWindow = {
         point = "CENTER",
@@ -136,9 +139,13 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
         CH:InitializeDB()
         if CH.InitializeAddonManager then CH:InitializeAddonManager() end
         if CH.InitializePerformance then CH:InitializePerformance() end
+        if CH.InitializeDebug then CH:InitializeDebug() end
         if CH.InitializeMinimap then CH:InitializeMinimap() end
         if CH.InitializeOptions then CH:InitializeOptions() end
-    elseif event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
+    elseif event == "PLAYER_LOGIN" then
+        if CH.InstallLuaErrorCapture then CH:InstallLuaErrorCapture() end
+        if CH.RefreshData then CH:RefreshData() end
+    elseif event == "PLAYER_ENTERING_WORLD" then
         if CH.RefreshData then CH:RefreshData() end
     end
 end)
