@@ -52,6 +52,13 @@ local function FormatMemory(kb)
     return string.format("%d KB", math.floor(kb + 0.5))
 end
 
+local function FormatCPU(value)
+    value = tonumber(value)
+    if value == nil then return "—" end
+    if value > 0 and value < 0.01 then return "<0.01%" end
+    return string.format("%.2f%%", value)
+end
+
 local function SelectTab(index)
     local frame = CH.optionsFrame
     if not frame then return end
@@ -103,7 +110,7 @@ function CH:RefreshAddonRows()
             row.memory:SetText(FormatMemory(addon.memoryKB))
 
             local cpu = self:GetCPUPercent(addon.name)
-            row.cpu:SetText(cpu and string.format("%.2f%%", cpu) or "—")
+            row.cpu:SetText(FormatCPU(cpu))
         else
             row:Hide()
         end
@@ -190,12 +197,18 @@ function CH:RefreshOptions()
     end
 
     if self.cpuStateText then
-        if self:IsCPUProfilingEnabled() then
-            self.cpuStateText:SetText("CPU: ON")
-            self.cpuStateText:SetTextColor(0.20, 1.00, 0.20)
-        else
+        if not self:IsCPUProfilingEnabled() then
             self.cpuStateText:SetText(self:T("CPU_UNAVAILABLE"))
             self.cpuStateText:SetTextColor(1.00, 0.82, 0.00)
+        elseif self.cpuSampleState == "unavailable" then
+            self.cpuStateText:SetText("CPU: API unavailable")
+            self.cpuStateText:SetTextColor(1.00, 0.35, 0.20)
+        elseif self.cpuSampleState == "sampling" or self.cpuSampleState == nil then
+            self.cpuStateText:SetText("CPU: ON – collecting sample…")
+            self.cpuStateText:SetTextColor(1.00, 0.82, 0.00)
+        else
+            self.cpuStateText:SetText("CPU: ON")
+            self.cpuStateText:SetTextColor(0.20, 1.00, 0.20)
         end
     end
 
