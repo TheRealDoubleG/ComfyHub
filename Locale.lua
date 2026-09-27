@@ -49,6 +49,8 @@ local EN = {
     MINIMAP_SHOW = "Show ComfyHub minimap button",
     MINIMAP_LOCK = "Lock ComfyHub minimap button",
 
+    INFO_TITLE = "ComfyHub",
+    INFO_TITLE = "ComfyHub",
     INFO_VERSION = "Version",
     INFO_BUILD_DATE = "Build date",
     INFO_STATUS = "Status",

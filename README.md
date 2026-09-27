@@ -1,13 +1,13 @@
 # ComfyHub
 
-**Version 0.1 – Beta**  
+**Version 0.2 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
 
 ComfyHub is the central addon manager, performance overview and minimap hub for the Comfy Suite on WoW Forever.
 
-## 0.1 Beta foundation
+## 0.2 Beta foundation
 
 - Lists installed addons with enable/disable checkboxes.
 - Shows installed addon version and WoW interface compatibility.
@@ -45,3 +45,10 @@ It cannot determine the newest internet release of arbitrary third-party addons 
 - `/ch refresh` – refresh addon and performance data.
 
 ComfyHub changes only addon/UI configuration and presentation. It does not automate gameplay.
+
+
+## Comfy Suite UI standard
+
+ComfyHub is the reference implementation for the shared Comfy Suite menu and Info-tab design. Current and future suite addons should use the same Blizzard-style window treatment, top-tab navigation, persistent window position, Info layout, Comfy Suite badge, compatibility details, author/Discord/GitHub fields and footer styling.
+
+See `COMFY_FAMILY_UI_STANDARD.md` for the canonical family standard.

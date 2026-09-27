@@ -1,5 +1,13 @@
 # ComfyHub Changelog
 
+## 0.2 Beta – 27.09.2026
+- Established ComfyHub as the reference implementation for the shared Comfy Suite UI standard.
+- Standardized tab geometry and Info-tab structure with OnPoint, ComfyBar and ComfyCC.
+- Added the Comfy Suite badge and copy-friendly GitHub field.
+- Added Comfy Suite metadata to the TOC for family identification.
+- Added the canonical COMFY_FAMILY_UI_STANDARD.md for all current and future suite addons.
+
+
 ## 0.1 Beta – 27.09.2026
 
 - Initial ComfyHub foundation.
