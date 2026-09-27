@@ -1,25 +1,32 @@
 # ComfyHub
 
-**Version 0.8 – Beta**  
+**Version 0.9 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
 
-ComfyHub is the central addon manager, performance overview and minimap hub for the Comfy Suite on WoW Forever.
+ComfyHub is the central addon manager, performance overview and minimap hub for the Comfy Suite on **World of Warcraft: Forever**.
+
+**Target policy:** ComfyHub is developed and tested for WoW: Forever only. Retail/Modern WoW, Midnight and WoW Classic are not compatibility targets. Ideas from other addon managers are used only as architectural lessons when they also make sense on the Forever client.
 
 ## 0.4 Beta foundation
 
 - Lists installed addons with enable/disable checkboxes.
+- Search installed addons by title, folder name, version or addon description.
+- Filter the list by all, enabled, disabled, loaded or problem-state addons.
+- Sort by Comfy Suite first, name, memory usage or compatibility status.
+- Hover a list row for a compact technical tooltip with folder name, addon description, enabled/loaded state and load reason when available.
 - Shows installed addon version and WoW interface compatibility.
 - Uses three simple compatibility states:
   - **Green:** compatible with the current client.
   - **Yellow:** out of date / interface mismatch.
   - **Red:** an explicit load or dependency problem was detected.
 - Shows per-addon memory usage and total addon memory.
+- RAM sampling is throttled instead of forcing WoW's addon-memory update every second; choose manual-only, 5 s, 10 s or 30 s in Performance.
 - Optional CPU profiling support when the WoW client exposes addon CPU profiling.
 - Changes can be prepared first and applied with a single **Apply & Reload** action.
 - Central ComfyHub minimap button.
-- Left click on ComfyHub toggles a compact minimap-edge flyout for **ComfyOnPoint**, **ComfyBar**, **ComfyCC** and **ComfyMacro**.\n- Comfy Suite minimap buttons are bundled under ComfyHub by default and can be restored from the shared **Settings** tab.
+- Left click on ComfyHub toggles a compact minimap-edge flyout for **ComfyOnPoint**, **ComfyBar**, **ComfyCC** and **ComfyMacro**.- Comfy Suite minimap buttons are bundled under ComfyHub by default and can be restored from the shared **Settings** tab.
 - Right click on ComfyHub opens the manager.
 - Flyout buttons open the corresponding Comfy addon settings when that addon is loaded.
 - German UI on a German client, English otherwise.
