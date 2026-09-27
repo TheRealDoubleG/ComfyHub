@@ -1,43 +1,45 @@
 ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
-function CH:IsCPUProfilingEnabled()
-    if type(GetCVarBool) == "function" then
-        local ok, value = pcall(GetCVarBool, "scriptProfile")
-        if ok then return value and true or false end
-    end
+local METRIC_KEYS = {
+    session = {"SessionAverageTime", 0},
+    recent = {"RecentAverageTime", 1},
+    encounter = {"EncounterAverageTime", 2},
+    current = {"LastTime", 3},
+    peak = {"PeakTime", 4},
+}
 
-    if type(GetCVar) == "function" then
-        local ok, value = pcall(GetCVar, "scriptProfile")
-        if ok then
-            return tostring(value) == "1"
-        end
-    end
-
-    return false
+local function Now()
+    if type(GetTimePreciseSec) == "function" then local ok,v=pcall(GetTimePreciseSec); if ok and tonumber(v) then return tonumber(v) end end
+    if type(GetTime) == "function" then local ok,v=pcall(GetTime); if ok and tonumber(v) then return tonumber(v) end end
+    return 0
 end
 
-function CH:SetCPUProfilingRequested(enabled)
-    if type(SetCVar) ~= "function" then return false end
+local function MetricEnum(key)
+    local spec=METRIC_KEYS[key]
+    if not spec then return nil end
+    if Enum and Enum.AddOnProfilerMetric and Enum.AddOnProfilerMetric[spec[1]] ~= nil then
+        return Enum.AddOnProfilerMetric[spec[1]]
+    end
+    return spec[2]
+end
 
-    local ok = pcall(SetCVar, "scriptProfile", enabled and "1" or "0")
-    if not ok then return false end
-
-    self.db.performance.cpuProfilingRequested = enabled and true or false
-    self:Print(self:T("CPU_RELOAD_REQUIRED"))
+function CH:HasNativeProfiler()
+    if not C_AddOnProfiler or type(C_AddOnProfiler.GetAddOnMetric) ~= "function" then return false end
+    if type(C_AddOnProfiler.IsEnabled) == "function" then
+        local ok,enabled=pcall(C_AddOnProfiler.IsEnabled)
+        if ok and enabled == false then return false end
+    end
     return true
 end
 
-local function Now()
-    if type(GetTimePreciseSec) == "function" then
-        local ok, value = pcall(GetTimePreciseSec)
-        if ok and tonumber(value) then return tonumber(value) end
-    end
-    if type(GetTime) == "function" then
-        local ok, value = pcall(GetTime)
-        if ok and tonumber(value) then return tonumber(value) end
-    end
-    return 0
+function CH:IsCPUProfilingEnabled()
+    return self:HasNativeProfiler()
+end
+
+function CH:SetCPUProfilingRequested()
+    self:Print(self:T("CPU_NATIVE_NO_TOGGLE"))
+    return false
 end
 
 function CH:GetMemoryUpdateInterval()
@@ -52,135 +54,70 @@ function CH:SetMemoryUpdateInterval(value)
     self.db.performance = self.db.performance or {}
     self.db.performance.memoryUpdateInterval = math.max(0, tonumber(value) or 0)
     self._lastMemoryUpdate = nil
-    if self.RefreshMemory then self:RefreshMemory(true) end
+    self:RefreshMemory(true)
     if self.RefreshOptions then self:RefreshOptions() end
 end
 
 function CH:RefreshMemory(force)
-    local interval = self:GetMemoryUpdateInterval()
-    local now = Now()
-
+    local interval=self:GetMemoryUpdateInterval()
+    local now=Now()
     if not force then
-        if interval <= 0 then return self.totalMemoryKB or 0 end
-        if self._lastMemoryUpdate and now < self._lastMemoryUpdate + interval then
-            return self.totalMemoryKB or 0
-        end
+        if interval<=0 then return self.totalMemoryKB or 0 end
+        if self._lastMemoryUpdate and now < self._lastMemoryUpdate + interval then return self.totalMemoryKB or 0 end
     end
-
-    self._lastMemoryUpdate = now
-
-    if type(UpdateAddOnMemoryUsage) == "function" then
-        pcall(UpdateAddOnMemoryUsage)
+    self._lastMemoryUpdate=now
+    if type(UpdateAddOnMemoryUsage)=="function" then pcall(UpdateAddOnMemoryUsage) end
+    local total=0
+    for _,addon in ipairs(self.addonList or {}) do
+        addon.memoryKB=self:GetAddOnMemoryKB(addon.index)
+        total=total+(addon.memoryKB or 0)
     end
-
-    local total = 0
-    if self.addonList then
-        for _, addon in ipairs(self.addonList) do
-            addon.memoryKB = self:GetAddOnMemoryKB(addon.index)
-            total = total + (addon.memoryKB or 0)
-        end
-    end
-
-    self.totalMemoryKB = total
+    self.totalMemoryKB=total
     return total
 end
 
-function CH:GetAddOnCPUUsageCompat(addon)
-    local getter = GetAddOnCPUUsage
-    if C_AddOns and type(C_AddOns.GetAddOnCPUUsage) == "function" then
-        getter = C_AddOns.GetAddOnCPUUsage
-    end
-    if type(getter) ~= "function" then return nil end
-
-    local candidates = {addon and addon.name, addon and addon.index}
-    for _, candidate in ipairs(candidates) do
-        if candidate ~= nil then
-            local ok, value = pcall(getter, candidate)
-            value = ok and tonumber(value) or nil
-            if value ~= nil then return value end
-        end
-    end
-    return nil
+function CH:GetNativeMetric(addonName,key)
+    if not self:HasNativeProfiler() or not addonName then return nil end
+    local metric=MetricEnum(key)
+    if metric==nil then return nil end
+    local ok,value=pcall(C_AddOnProfiler.GetAddOnMetric,addonName,metric)
+    value=ok and tonumber(value) or nil
+    return value
 end
 
 function CH:RefreshCPU()
-    if not self:IsCPUProfilingEnabled() then
-        self.cpuPercent = {}
-        self._cpuPrev = nil
-        self._cpuPrevTime = nil
-        self.cpuSampleState = "disabled"
+    self.cpuMetrics={}
+    if not self:HasNativeProfiler() then
+        self.cpuSampleState="unavailable"
         return false
     end
-
-    local updater = UpdateAddOnCPUUsage
-    if C_AddOns and type(C_AddOns.UpdateAddOnCPUUsage) == "function" then
-        updater = C_AddOns.UpdateAddOnCPUUsage
-    end
-
-    local getterAvailable = type(GetAddOnCPUUsage) == "function"
-        or (C_AddOns and type(C_AddOns.GetAddOnCPUUsage) == "function")
-
-    if not getterAvailable then
-        self.cpuPercent = {}
-        self.cpuSampleState = "unavailable"
-        return false
-    end
-
-    if type(updater) == "function" then pcall(updater) end
-
-    local now
-    if type(GetTimePreciseSec) == "function" then
-        local ok, value = pcall(GetTimePreciseSec)
-        now = ok and tonumber(value) or nil
-    end
-    if not now and type(GetTime) == "function" then
-        local ok, value = pcall(GetTime)
-        now = ok and tonumber(value) or nil
-    end
-    now = now or 0
-
-    local current = {}
-    local anyValue = false
-
-    if self.addonList then
-        for _, addon in ipairs(self.addonList) do
-            local value = self:GetAddOnCPUUsageCompat(addon)
-            if value ~= nil then
-                current[addon.name] = value
-                anyValue = true
-            end
+    local any=false
+    for _,addon in ipairs(self.addonList or {}) do
+        if addon.loaded then
+            local m={
+                current=self:GetNativeMetric(addon.name,"current"),
+                recent=self:GetNativeMetric(addon.name,"recent"),
+                session=self:GetNativeMetric(addon.name,"session"),
+                peak=self:GetNativeMetric(addon.name,"peak"),
+                encounter=self:GetNativeMetric(addon.name,"encounter"),
+            }
+            self.cpuMetrics[addon.name]=m
+            if m.current~=nil or m.recent~=nil or m.peak~=nil then any=true end
         end
     end
-
-    if not anyValue then
-        self.cpuPercent = {}
-        self.cpuSampleState = "unavailable"
-        return false
-    end
-
-    self.cpuPercent = self.cpuPercent or {}
-
-    if self._cpuPrev and self._cpuPrevTime and now > self._cpuPrevTime then
-        local elapsedMs = (now - self._cpuPrevTime) * 1000
-        for name, value in pairs(current) do
-            local previous = self._cpuPrev[name]
-            if previous ~= nil then
-                local delta = math.max(0, value - previous)
-                self.cpuPercent[name] = elapsedMs > 0 and (delta / elapsedMs) * 100 or 0
-            end
-        end
-        self.cpuSampleState = "ready"
-    else
-        self.cpuSampleState = "sampling"
-    end
-
-    self._cpuPrev = current
-    self._cpuPrevTime = now
-    return true
+    self.cpuSampleState=any and "native" or "unavailable"
+    return any
 end
 
+function CH:GetCPUMetric(name,key)
+    local m=self.cpuMetrics and self.cpuMetrics[name]
+    return m and m[key] or nil
+end
+
+-- Compatibility helper used by the compact Addons/preview UI. The value is
+-- native profiler time in milliseconds for the most recent tick, not percent.
 function CH:GetCPUPercent(name)
-    return self.cpuPercent and self.cpuPercent[name] or nil
+    return self:GetCPUMetric(name,"current")
 end
 
 function CH:RefreshData(forceMemory)
@@ -192,7 +129,8 @@ function CH:RefreshData(forceMemory)
 end
 
 function CH:InitializePerformance()
-    self.cpuPercent = {}
-    self._lastMemoryUpdate = nil
+    self.cpuMetrics={}
+    self._lastMemoryUpdate=nil
     self:RefreshMemory(true)
+    self:RefreshCPU()
 end
