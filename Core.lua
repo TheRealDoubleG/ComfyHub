@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.7"
+CH.version = "0.8"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -42,6 +42,12 @@ local defaults = {
         relativePoint = "CENTER",
         x = 0,
         y = 20,
+    },
+    ui = {
+        windowLocked = false,
+        windowOpacity = 100,
+        showWindowBorder = true,
+        backgroundAlpha = 92,
     },
 }
 
@@ -88,12 +94,16 @@ function CH:GetCompatibilityStatus()
 end
 
 function CH:InitializeDB()
-    if type(ComfyHubDB) ~= "table" then
-        ComfyHubDB = CopyTable(defaults)
+    if self.InitializeProfileStorage then
+        self:InitializeProfileStorage(defaults, "ComfyHubDB")
     else
-        ApplyDefaults(ComfyHubDB, defaults)
+        if type(ComfyHubDB) ~= "table" then
+            ComfyHubDB = CopyTable(defaults)
+        else
+            ApplyDefaults(ComfyHubDB, defaults)
+        end
+        self.db = ComfyHubDB
     end
-    self.db = ComfyHubDB
 end
 
 function CH:GetPendingCount()
