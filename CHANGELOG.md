@@ -1,5 +1,9 @@
 # ComfyHub Changelog
 
+## 0.17 Beta – 28.09.2026
+- Added ComfyBattleText to the Suite registry and ComfyHub minimap flyout.
+
+
 ## 0.16 Beta – 28.09.2026
 - Added ComfyQoL and ComfyMaps to the Suite registry and minimap collector.
 - Compacted the Suite page to fit the expanded addon family.
