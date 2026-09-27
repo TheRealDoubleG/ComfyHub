@@ -135,6 +135,7 @@ function CH:EnsureSharedUISettings()
     if ui.windowOpacity == nil then ui.windowOpacity = 100 end
     if ui.showWindowBorder == nil then ui.showWindowBorder = true end
     if ui.backgroundAlpha == nil then ui.backgroundAlpha = 92 end
+    if ui.addonManagerPreviewStyle == nil then ui.addonManagerPreviewStyle = false end
 end
 
 function CH:GetActiveStorageProfileKey()
@@ -545,6 +546,19 @@ function CH:BuildSharedSettingsPage(page)
                 function() return CH.db.minimap.bundleSuiteIcons ~= false end,
                 function(v) CH:SetMinimapBundling(v) end)
         end
+
+        AddText(L("Experimentelle Addon-Ansicht", "Experimental addon view"), 420, -392, "GameFontNormal")
+        AddCheck(L("Kompakte Manager-Vorschau aktivieren", "Enable compact manager preview"), 420, -419,
+            function() CH:EnsureSharedUISettings() return CH.db.ui.addonManagerPreviewStyle end,
+            function(v)
+                CH.db.ui.addonManagerPreviewStyle = v
+                if CH.ApplyAddonManagerViewMode then CH:ApplyAddonManagerViewMode() end
+                if CH.RefreshOptions then CH:RefreshOptions() end
+            end)
+        AddText(
+            L("Nur zum Vergleichen des Layouts. Inspiriert vom gezeigten Addon-Manargl-Screenshot, aber mit eigenem ComfyHub-Aufbau und ohne fremde Grafiken oder Code.",
+              "Layout comparison only. Inspired by the shown Addon Manargl screenshot, but built with ComfyHub's own layout, assets and code."),
+            445, -452, "GameFontHighlightSmall", 300)
     end
 
     self:RefreshSharedSettingsPage()
