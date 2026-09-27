@@ -201,10 +201,10 @@ function CH:RefreshOptions()
             self.cpuStateText:SetText(self:T("CPU_UNAVAILABLE"))
             self.cpuStateText:SetTextColor(1.00, 0.82, 0.00)
         elseif self.cpuSampleState == "unavailable" then
-            self.cpuStateText:SetText("CPU: API unavailable")
+            self.cpuStateText:SetText((GetLocale and GetLocale() == "deDE") and "CPU: API nicht verfügbar" or "CPU: API unavailable")
             self.cpuStateText:SetTextColor(1.00, 0.35, 0.20)
         elseif self.cpuSampleState == "sampling" or self.cpuSampleState == nil then
-            self.cpuStateText:SetText("CPU: ON – collecting sample…")
+            self.cpuStateText:SetText((GetLocale and GetLocale() == "deDE") and "CPU: AN – Messwert wird gesammelt…" or "CPU: ON – collecting sample…")
             self.cpuStateText:SetTextColor(1.00, 0.82, 0.00)
         else
             self.cpuStateText:SetText("CPU: ON")
@@ -477,7 +477,9 @@ function CH:InitializeOptions()
     suiteNote:SetPoint("TOPLEFT", 20, -405)
     suiteNote:SetWidth(760)
     suiteNote:SetJustifyH("LEFT")
-    suiteNote:SetText("Minimap- und Fensteroptionen befinden sich einheitlich im Reiter " .. self:GetSharedSettingsTabLabel() .. ".")
+    suiteNote:SetText((GetLocale and GetLocale() == "deDE")
+        and ("Minimap- und Fensteroptionen befinden sich einheitlich im Reiter " .. self:GetSharedSettingsTabLabel() .. ".")
+        or ("Minimap and window options are now grouped in the " .. self:GetSharedSettingsTabLabel() .. " tab."))
 
     -- Debug / Lua errors
     local debugPage = frame.pages[4]
