@@ -987,7 +987,7 @@ function CH:InitializeOptions()
 
     for i, entry in ipairs(self.family or {}) do
         local name = entry.name
-        local y = -70 - (i - 1) * 32
+        local y = -68 - (i - 1) * 26
 
         local icon = suite:CreateTexture(nil,"ARTWORK")
         icon:SetSize(20,20); icon:SetPoint("TOPLEFT",25,y+4); icon:SetTexture(entry.icon); icon:SetTexCoord(0.07,0.93,0.07,0.93)
@@ -1015,7 +1015,7 @@ function CH:InitializeOptions()
     end
 
     local suiteNote = suite:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    suiteNote:SetPoint("TOPLEFT", 20, -520)
+    suiteNote:SetPoint("TOPLEFT", 20, -555)
     suiteNote:SetWidth(760)
     suiteNote:SetJustifyH("LEFT")
     suiteNote:SetText((GetLocale and GetLocale() == "deDE")
