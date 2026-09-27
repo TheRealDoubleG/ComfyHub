@@ -186,11 +186,88 @@ function CH:GetAddOnMemoryKB(indexOrName)
     return tonumber(value) or 0
 end
 
-function CH:BuildAddonList()
-    if type(UpdateAddOnMemoryUsage) == "function" then
-        pcall(UpdateAddOnMemoryUsage)
+function CH:IsSuiteAddonName(name)
+    if name == self.name then return true end
+    for _, entry in ipairs(self.family or {}) do
+        if entry.name == name then return true end
+    end
+    return false
+end
+
+function CH:GetAddonListFilter()
+    local value = self.db and self.db.addons and self.db.addons.filter or "all"
+    local allowed = {all=true, enabled=true, disabled=true, loaded=true, problems=true}
+    return allowed[value] and value or "all"
+end
+
+function CH:SetAddonListFilter(value)
+    if not self.db then return end
+    self.db.addons = self.db.addons or {}
+    self.db.addons.filter = value or "all"
+    if self.RefreshAddonRows then self:RefreshAddonRows(true) end
+end
+
+function CH:GetAddonListSort()
+    local value = self.db and self.db.addons and self.db.addons.sort or "suite"
+    local allowed = {suite=true, name=true, memory=true, status=true}
+    return allowed[value] and value or "suite"
+end
+
+function CH:SetAddonListSort(value)
+    if not self.db then return end
+    self.db.addons = self.db.addons or {}
+    self.db.addons.sort = value or "suite"
+    if self.RefreshAddonRows then self:RefreshAddonRows(true) end
+end
+
+function CH:GetVisibleAddonList()
+    local source = self.addonList or {}
+    local filter = self:GetAddonListFilter()
+    local needle = tostring(self.addonSearchText or ""):lower():match("^%s*(.-)%s*$")
+    local list = {}
+
+    for _, addon in ipairs(source) do
+        local matchesFilter = filter == "all"
+            or (filter == "enabled" and addon.enabled)
+            or (filter == "disabled" and not addon.enabled)
+            or (filter == "loaded" and addon.loaded)
+            or (filter == "problems" and (addon.statusKey == "red" or addon.statusKey == "yellow"))
+
+        local haystack = table.concat({
+            tostring(addon.title or ""),
+            tostring(addon.name or ""),
+            tostring(addon.version or ""),
+            tostring(addon.description or ""),
+        }, " "):lower()
+
+        if matchesFilter and (needle == "" or haystack:find(needle, 1, true)) then
+            list[#list + 1] = addon
+        end
     end
 
+    local sortMode = self:GetAddonListSort()
+    table.sort(list, function(a, b)
+        if sortMode == "memory" then
+            local am = tonumber(a.memoryKB) or 0
+            local bm = tonumber(b.memoryKB) or 0
+            if am ~= bm then return am > bm end
+        elseif sortMode == "status" then
+            local rank = {red = 1, yellow = 2, unknown = 3, green = 4}
+            local ar = rank[a.statusKey] or 9
+            local br = rank[b.statusKey] or 9
+            if ar ~= br then return ar < br end
+        elseif sortMode == "suite" then
+            local as = self:IsSuiteAddonName(a.name) and 0 or 1
+            local bs = self:IsSuiteAddonName(b.name) and 0 or 1
+            if as ~= bs then return as < bs end
+        end
+        return tostring(a.title):lower() < tostring(b.title):lower()
+    end)
+
+    return list
+end
+
+function CH:BuildAddonList()
     local list = {}
     local count = self:GetNumAddOnsCompat()
 
@@ -209,6 +286,7 @@ function CH:BuildAddonList()
                 statusKey = colorKey,
                 statusText = statusText,
                 reason = info.reason,
+                description = info.notes,
                 memoryKB = self:GetAddOnMemoryKB(index),
             })
         end
