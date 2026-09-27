@@ -421,6 +421,34 @@ function CH:RefreshOptions()
     if self.RefreshSharedSettingsPage then self:RefreshSharedSettingsPage() end
 end
 
+function CH:RegisterBlizzardSettingsCategory()
+    if self.settingsCategory then return end
+    if not (Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory) then return end
+
+    local canvas = CreateFrame("Frame")
+    local isDE = type(GetLocale) == "function" and GetLocale() == "deDE"
+
+    local title = canvas:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 16, -16)
+    title:SetText("ComfyHub")
+
+    local desc = canvas:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -12)
+    desc:SetWidth(520)
+    desc:SetJustifyH("LEFT")
+    desc:SetText(isDE
+        and "Öffnet das vollständige ComfyHub-Einstellungsfenster der Comfy Suite."
+        or "Opens the full ComfyHub settings window for the Comfy Suite.")
+
+    CreateButton(canvas, isDE and "Einstellungen öffnen" or "Open settings", 16, -90, 220, function()
+        CH:ShowOptions()
+    end)
+
+    local category = Settings.RegisterCanvasLayoutCategory(canvas, "ComfyHub")
+    Settings.RegisterAddOnCategory(category)
+    self.settingsCategory = category
+end
+
 function CH:InitializeOptions()
     if self.optionsFrame then return end
 
@@ -1211,6 +1239,7 @@ function CH:InitializeOptions()
     self:ApplySharedWindowSettings()
     SelectTab(1)
     self:RefreshOptions()
+    self:RegisterBlizzardSettingsCategory()
 end
 
 function CH:ShowOptions()
