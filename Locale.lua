@@ -84,7 +84,7 @@ local EN = {
     LUA_COUNT = "Captured errors: %d",
     LUA_CAPTURE_UNAVAILABLE = "Lua error capture is unavailable on this client.",
 
-    SUITE_HINT = "ComfyHub can open the settings of loaded Comfy Suite addons. The minimap flyout uses the same entries.",
+    SUITE_HINT = "ComfyHub can open every loaded Comfy Suite addon here. The minimap flyout intentionally keeps only a compact set of shortcuts.",
     OPEN = "Open",
     NOT_INSTALLED = "Not installed",
     NOT_LOADED = "Not loaded",
@@ -201,7 +201,7 @@ local DE = {
     LUA_COUNT = "Erfasste Fehler: %d",
     LUA_CAPTURE_UNAVAILABLE = "Das Erfassen von Lua-Fehlern ist auf diesem Client nicht verfügbar.",
 
-    SUITE_HINT = "ComfyHub kann die Einstellungen geladener Comfy-Suite-Addons öffnen. Das Minimap-Flyout verwendet dieselben Einträge.",
+    SUITE_HINT = "ComfyHub kann hier jedes geladene Comfy-Suite-Addon öffnen. Das Minimap-Flyout bleibt bewusst auf wenige kompakte Schnellzugriffe begrenzt.",
     OPEN = "Öffnen",
     NOT_INSTALLED = "Nicht installiert",
     NOT_LOADED = "Nicht geladen",
