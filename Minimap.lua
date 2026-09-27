@@ -144,7 +144,10 @@ function CH:CreateFlyout()
     backdrop:Hide()
     self.flyoutBackdrop = backdrop
 
-    for index, entry in ipairs(self.family) do
+    local flyoutIndex = 0
+    for _, entry in ipairs(self.family) do
+        if entry.flyout ~= false then
+            flyoutIndex = flyoutIndex + 1
         local button = CreateRoundButton("ComfyHubFlyout" .. entry.name, UIParent, entry.icon)
         button:SetFrameStrata("DIALOG")
         button:SetFrameLevel(20)
@@ -170,7 +173,8 @@ function CH:CreateFlyout()
             GameTooltip:Hide()
         end)
 
-        self.flyoutButtons[index] = button
+        self.flyoutButtons[flyoutIndex] = button
+        end
     end
 end
 
