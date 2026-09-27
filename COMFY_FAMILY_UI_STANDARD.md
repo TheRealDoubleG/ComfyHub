@@ -1,6 +1,6 @@
 # Comfy Suite UI Standard
 
-**Standard version: 1**  
+**Standard version: 2**  
 **Maintainer: TheRealDoubleG**  
 **Applies to:** ComfyOnPoint, ComfyBar, ComfyCC, ComfyMacro, ComfyHub and all future Comfy Suite addons.
 
@@ -15,6 +15,8 @@ This document is the visual and structural baseline for the addon family. Indivi
 - Larger tools such as ComfyHub may use a wider window when required by tables or dashboards.
 - Pages use the same inner margins: top-left at **12, -70** and bottom-right at **-12, 12**.
 - Tabs appear across the top using the same Blizzard button style, **110 px** width and **120 px** spacing where practical.
+- The active tab remains enabled and uses the pushed/selected Blizzard button state; do not make the selected tab look disabled or grey.
+- Every addon has a shared **Settings / Einstellungen** tab immediately before **Info**.
 - The **Info** tab is always the final tab.
 
 ## Info-tab standard
@@ -40,16 +42,35 @@ Every addon must provide the same information structure:
 
 The standard Info panel is **680×455**, positioned at **20, -52** inside the Info page. Standard text widths and row positions follow the ComfyOnPoint/ComfyBar reference implementation.
 
+## Shared Settings tab
+
+The Settings tab contains suite-wide behavior and presentation controls that are not part of the addon's primary feature workflow:
+
+- Automatic per-character saved profile (default).
+- Optional account profile.
+- Named custom profiles.
+- Copy/load another known character profile into the current character profile.
+- Profile creation, deletion and reset without requiring another addon.
+- Settings-window position lock and position reset.
+- Overall window opacity from **10–100%** so the window cannot accidentally become fully invisible.
+- Optional Blizzard frame/border.
+- Minimal black/grey borderless background mode.
+- Independent background opacity from **0–100%**.
+- Minimap icon visibility/lock controls where the addon has a minimap icon.
+- ComfyHub additionally owns Comfy Suite minimap-icon bundling.
+
+A future optional **ComfyProfiles** addon may provide a central profile-management front end, but individual addons must keep their own profile engine and remain fully usable without it.
+
 ## Family metadata
 
 Every suite addon TOC must include:
 
 ```
 ## X-ComfySuite: true
-## X-ComfyUI: 1
+## X-ComfyUI: 2
 ```
 
-`X-ComfyUI` identifies the family UI-standard generation. Increase it only when the suite-wide standard changes intentionally.
+`X-ComfyUI` identifies the family UI-standard generation. Standard generation **2** adds the shared Settings/profile/window system and selected-tab behavior.
 
 ## Menu language and behavior
 
