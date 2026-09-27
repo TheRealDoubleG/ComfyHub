@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.15"
+CH.version = "0.16"
 CH.buildDate = "27.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -29,6 +29,8 @@ CH.family = {
     {name = "ComfyBag",      icon = "Interface\\Icons\\INV_Misc_Bag_10", flyout = true},
     {name = "ComfyMog",      icon = "Interface\\Icons\\INV_Misc_Cape_18", flyout = true},
     {name = "ComfyXP",       icon = "Interface\\Icons\\INV_Misc_Book_09", flyout = true},
+    {name = "ComfyQoL",      icon = "Interface\\Icons\\INV_Misc_Gear_01", flyout = true},
+    {name = "ComfyMaps",     icon = "Interface\\Icons\\INV_Misc_Map_01", flyout = true},
     {name = "ComfyGatherer", icon = "Interface\\Icons\\INV_Misc_Herb_07", flyout = true},
     {name = "ComfyKills",    icon = "Interface\\Icons\\Ability_DualWield", flyout = true},
     {name = "ComfyData",     icon = "Interface\\Icons\\INV_Misc_Book_11", flyout = false, openable = false},
