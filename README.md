@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.11 – Beta**  
+**Version 0.12 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -100,3 +100,8 @@ ComfyHub 0.6 recognizes **ComfyMacro** as a Comfy Suite addon and includes it in
 ## Native Forever profiler
 
 ComfyHub 0.11 uses the WoW Forever C_AddOnProfiler API when available. The Performance page shows current tick time, recent average, peak and encounter average in milliseconds for loaded addons. The older scriptProfile CVar is no longer the normal ComfyHub CPU path.
+
+
+## 0.12 minimap flyout
+
+The bundled Comfy Suite minimap shortcuts now open in a compact 2-column panel beside the minimap instead of spreading around the minimap edge. The panel automatically opens toward the center of the screen to avoid covering the minimap.
