@@ -143,6 +143,15 @@ function CH:GetAddOnVersion(name)
     return tostring(version)
 end
 
+function CH:GetAddOnIcon(name)
+    local icon = self:GetAddOnMetadataCompat(name, "IconTexture")
+    if icon == nil or tostring(icon) == "" then
+        return "Interface\\Icons\\INV_Misc_QuestionMark"
+    end
+    local numeric = tonumber(icon)
+    return numeric or tostring(icon)
+end
+
 function CH:GetAddonCompatibility(info)
     if not info then
         return "unknown", self:T("STATUS_UNKNOWN")
@@ -194,6 +203,7 @@ function CH:BuildAddonList()
                 name = info.name,
                 title = info.title or info.name,
                 version = self:GetAddOnVersion(info.name),
+                icon = self:GetAddOnIcon(info.name),
                 enabled = self:GetAddOnEnableStateCompat(info.name),
                 loaded = self:IsAddOnLoadedCompat(info.name),
                 statusKey = colorKey,
