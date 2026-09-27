@@ -377,6 +377,10 @@ function CH:RefreshOptions()
     if self.addonFilterDropdown and self.addonFilterDropdown._refresh then self.addonFilterDropdown._refresh() end
     if self.addonSortDropdown and self.addonSortDropdown._refresh then self.addonSortDropdown._refresh() end
     if self.memoryIntervalDropdown and self.memoryIntervalDropdown._refresh then self.memoryIntervalDropdown._refresh() end
+    if self.addonSearchBox and not self.addonSearchBox:HasFocus() then
+        local wanted = tostring(self.addonSearchText or "")
+        if self.addonSearchBox:GetText() ~= wanted then self.addonSearchBox:SetText(wanted) end
+    end
     self:ApplyAddonManagerViewMode()
     self:RefreshAddonPreviewRows(false)
     if self.RefreshSharedSettingsPage then self:RefreshSharedSettingsPage() end
@@ -674,7 +678,9 @@ function CH:InitializeOptions()
     self.previewSearchBox:SetPoint("TOPLEFT", 165, -30)
     self.previewSearchBox:SetSize(250, 28)
     self.previewSearchBox:SetAutoFocus(false)
-    self.previewSearchBox:SetTextInsets(24, 8, 0, 0)
+    if self.previewSearchBox.SetTextInsets then
+        self.previewSearchBox:SetTextInsets(24, 8, 0, 0)
+    end
     self.previewSearchBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
     self.previewSearchBox:SetScript("OnTextChanged", function(self)
         CH.addonSearchText = self:GetText() or ""
