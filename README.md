@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.15 – Beta**  
+**Version 0.16 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -51,6 +51,8 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - **ComfyBag** – unified searchable normal inventory.
 - **ComfyMog** – transmog collection tooltip helper.
 - **ComfyXP** – XP progress and session pace bar.
+- **ComfyQoL** – modular general quality-of-life features.
+- **ComfyMaps** – world map enhancements, coordinates and Suite map data.
 - **ComfyGatherer** – personal gathering database and minimap tracker.
 - **ComfyKills** – mob-kill database and statistics browser.
 - **ComfyData** – persistent shared Suite data service.
