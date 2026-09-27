@@ -1,5 +1,12 @@
 # ComfyHub Changelog
 
+## 0.15 Beta – 28.09.2026
+- Registered ComfyHub in Blizzard's native AddOns settings list.
+- Expanded the minimap collector to every user-facing Comfy addon.
+- Switched the collector panel to a compact 3-column layout.
+- Kept ComfyData and ComfyDataVault as non-openable background services in the Suite registry.
+
+
 ## 0.14 Beta – 28.09.2026
 - Added ComfyGatherer and ComfyKills to the Suite registry and compact minimap flyout.
 - Added ComfyData and ComfyDataVault to the Suite registry as background services.
