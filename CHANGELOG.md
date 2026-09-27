@@ -1,5 +1,11 @@
 # ComfyHub Changelog
 
+## 0.16 Beta – 28.09.2026
+- Added ComfyQoL and ComfyMaps to the Suite registry and minimap collector.
+- Compacted the Suite page to fit the expanded addon family.
+- Switched the minimap collector to a compact 4-column layout.
+
+
 ## 0.15 Beta – 28.09.2026
 - Registered ComfyHub in Blizzard's native AddOns settings list.
 - Expanded the minimap collector to every user-facing Comfy addon.
