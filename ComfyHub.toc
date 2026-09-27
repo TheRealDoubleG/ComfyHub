@@ -3,7 +3,7 @@
 ## Notes: Central addon manager, performance monitor and minimap hub for the Comfy Suite on WoW Forever.
 ## Notes-deDE: Zentraler Addon-Manager, Leistungsübersicht und Minimap-Hub für die Comfy Suite in WoW Forever.
 ## Author: TheRealDoubleG
-## Version: 0.10
+## Version: 0.11
 ## SavedVariables: ComfyHubDB
 ## X-Website: https://github.com/TheRealDoubleG/ComfyHub
 ## X-ComfySuite: true
