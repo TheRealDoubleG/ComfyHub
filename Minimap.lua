@@ -1,8 +1,11 @@
 ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
-local FLYOUT_ANGLE_STEP = 22
-local FLYOUT_PADDING = 5
+local FLYOUT_COLUMNS = 2
+local FLYOUT_BUTTON_SIZE = 30
+local FLYOUT_GAP = 4
+local FLYOUT_PADDING = 6
+local FLYOUT_OFFSET = 8
 
 local function GetButtonRadius(button)
     if not Minimap then return 95 end
@@ -148,7 +151,7 @@ function CH:CreateFlyout()
     for _, entry in ipairs(self.family) do
         if entry.flyout ~= false then
             flyoutIndex = flyoutIndex + 1
-        local button = CreateRoundButton("ComfyHubFlyout" .. entry.name, UIParent, entry.icon)
+        local button = CreateRoundButton("ComfyHubFlyout" .. entry.name, backdrop, entry.icon)
         button:SetFrameStrata("DIALOG")
         button:SetFrameLevel(20)
         button:Hide()
@@ -178,74 +181,80 @@ function CH:CreateFlyout()
     end
 end
 
-function CH:UpdateFlyoutBackdrop()
+function CH:PositionFlyoutBackdrop()
     local backdrop = self.flyoutBackdrop
-    if not backdrop then return end
+    if not backdrop or not self.minimapButton or not Minimap then return end
 
-    if not self.flyoutShown or not self:IsMinimapBundlingActive() then
-        backdrop:Hide()
-        return
-    end
-
-    local left, right, top, bottom
-    local visibleCount = 0
-
-    for _, button in ipairs(self.flyoutButtons or {}) do
-        if button:IsShown() then
-            local l, r, t, b = button:GetLeft(), button:GetRight(), button:GetTop(), button:GetBottom()
-            if l and r and t and b then
-                left = left and math.min(left, l) or l
-                right = right and math.max(right, r) or r
-                top = top and math.max(top, t) or t
-                bottom = bottom and math.min(bottom, b) or b
-                visibleCount = visibleCount + 1
-            end
-        end
-    end
-
-    if visibleCount == 0 or not left or not right or not top or not bottom then
-        backdrop:Hide()
-        return
-    end
+    local mx, my = Minimap:GetCenter()
+    local ux, uy = UIParent:GetCenter()
+    if not mx or not my or not ux or not uy then return end
 
     backdrop:ClearAllPoints()
-    backdrop:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left - FLYOUT_PADDING, bottom - FLYOUT_PADDING)
-    backdrop:SetSize((right - left) + FLYOUT_PADDING * 2, (top - bottom) + FLYOUT_PADDING * 2)
-    backdrop:Show()
+
+    -- Open toward the center of the screen instead of around the minimap.
+    -- This avoids covering the minimap and keeps the flyout on-screen.
+    local openLeft = mx >= ux
+    local extendDown = my >= uy
+
+    if openLeft and extendDown then
+        backdrop:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -FLYOUT_OFFSET, 0)
+    elseif openLeft then
+        backdrop:SetPoint("BOTTOMRIGHT", Minimap, "BOTTOMLEFT", -FLYOUT_OFFSET, 0)
+    elseif extendDown then
+        backdrop:SetPoint("TOPLEFT", Minimap, "TOPRIGHT", FLYOUT_OFFSET, 0)
+    else
+        backdrop:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMRIGHT", FLYOUT_OFFSET, 0)
+    end
 end
 
 function CH:RefreshFlyout()
     if not self.flyoutButtons or not self.minimapButton or not self.db then return end
 
-    if not self:IsMinimapBundlingActive() then
-        self.flyoutShown = false
-        for _, button in ipairs(self.flyoutButtons) do
-            button:Hide()
-        end
+    if not self:IsMinimapBundlingActive() or not self.flyoutShown then
+        for _, button in ipairs(self.flyoutButtons) do button:Hide() end
         if self.flyoutBackdrop then self.flyoutBackdrop:Hide() end
         return
     end
 
-    local baseAngle = tonumber(self.db.minimap.angle) or 220
-    local direction = math.sin(math.rad(baseAngle)) < 0 and -1 or 1
     local slot = 0
-
     for _, button in ipairs(self.flyoutButtons) do
         local installed = self:IsAddonInstalled(button.entry.name)
         if installed then
             slot = slot + 1
-            local angle = baseAngle + direction * FLYOUT_ANGLE_STEP * slot
-            PositionFromAngle(button, angle)
+            local col = (slot - 1) % FLYOUT_COLUMNS
+            local row = math.floor((slot - 1) / FLYOUT_COLUMNS)
+
+            button:ClearAllPoints()
+            button:SetPoint(
+                "TOPLEFT",
+                self.flyoutBackdrop,
+                "TOPLEFT",
+                FLYOUT_PADDING + col * (FLYOUT_BUTTON_SIZE + FLYOUT_GAP),
+                -(FLYOUT_PADDING + row * (FLYOUT_BUTTON_SIZE + FLYOUT_GAP))
+            )
+
             local loaded = self:IsAddOnLoadedCompat(button.entry.name)
             button.icon:SetDesaturated(not loaded)
             button.icon:SetVertexColor(loaded and 1 or 0.55, loaded and 1 or 0.55, loaded and 1 or 0.55)
-            button:SetShown(self.flyoutShown and self.db.minimap.show)
+            button:Show()
         else
             button:Hide()
         end
     end
 
-    self:UpdateFlyoutBackdrop()
+    if slot == 0 then
+        self.flyoutBackdrop:Hide()
+        return
+    end
+
+    local columns = math.min(FLYOUT_COLUMNS, slot)
+    local rows = math.ceil(slot / FLYOUT_COLUMNS)
+    local width = FLYOUT_PADDING * 2 + columns * FLYOUT_BUTTON_SIZE + math.max(0, columns - 1) * FLYOUT_GAP
+    local height = FLYOUT_PADDING * 2 + rows * FLYOUT_BUTTON_SIZE + math.max(0, rows - 1) * FLYOUT_GAP
+
+    self.flyoutBackdrop:SetSize(width, height)
+    self:PositionFlyoutBackdrop()
+    self.flyoutBackdrop:Show()
 end
 
 function CH:ToggleFlyout()
