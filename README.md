@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.18 – Beta**  
+**Version 0.19 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -121,3 +121,10 @@ The bundled Comfy Suite minimap shortcuts now open in a compact 2-column panel b
 - Every user-facing Comfy addon is available from the compact ComfyHub minimap collector.
 - The collector uses a compact 3-column panel beside the minimap.
 - ComfyData and ComfyDataVault stay visible in the Suite list as background services but are not placed in the minimap flyout.
+
+
+## New Suite modules
+
+- **ComfyCastBar** – player/target/focus/pet cast bars.
+- **ComfyFrames** – modular player, target, party and raid unit frames.
+- **ComfyHeal** – secure click-casting and dispel/healing assistance.
