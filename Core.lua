@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.18"
+CH.version = "0.19"
 CH.buildDate = "28.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
@@ -22,6 +22,9 @@ CH.family = {
     {name = "ComfyBar",      icon = "Interface\\Icons\\INV_Misc_Bag_10", flyout = true},
     {name = "ComfyCC",       icon = "Interface\\Icons\\Spell_Holy_BorrowedTime", flyout = true},
     {name = "ComfyBattleText",icon = "Interface\\Icons\\Ability_Warrior_BattleShout", flyout = true},
+    {name = "ComfyCastBar",  icon = "Interface\\Icons\\Spell_Nature_TimeStop", flyout = true},
+    {name = "ComfyFrames",   icon = "Interface\\Icons\\INV_Misc_GroupLooking", flyout = true},
+    {name = "ComfyHeal",     icon = "Interface\\Icons\\Spell_Holy_FlashHeal", flyout = true},
     {name = "ComfyMacro",    icon = "Interface\\Icons\\INV_Misc_Note_01", flyout = true},
     {name = "ComfyProfiles", icon = "Interface\\Icons\\INV_Misc_Note_03", flyout = true},
     {name = "ComfyKey",      icon = "Interface\\Icons\\INV_Misc_Key_03", flyout = true},
