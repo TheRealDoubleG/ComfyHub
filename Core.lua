@@ -4,7 +4,7 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.19"
+CH.version = "0.20"
 CH.buildDate = "28.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
