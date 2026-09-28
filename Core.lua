@@ -4,8 +4,8 @@ ComfyHub = ComfyHub or {}
 local CH = ComfyHub
 
 CH.name = ADDON_NAME or "ComfyHub"
-CH.version = "0.17"
-CH.buildDate = "27.09.2026"
+CH.version = "0.18"
+CH.buildDate = "28.09.2026"
 CH.status = "Beta"
 CH.gameVersion = "WoW Forever 1.60.1"
 CH.targetBuild = "70009"
@@ -55,6 +55,9 @@ local defaults = {
     },
     debug = {
         maxLuaErrors = 50,
+    },
+    layout = {
+        editMode = false,
     },
     optionsWindow = {
         point = "CENTER",
@@ -155,6 +158,8 @@ SlashCmdList.COMFYHUB = function(msg)
         if CH.ToggleFlyout then CH:ToggleFlyout() end
     elseif msg == "refresh" then
         if CH.RefreshData then CH:RefreshData(true) end
+    elseif msg == "edit" then
+        if CH.SetSuiteEditMode then CH:SetSuiteEditMode(not CH:IsSuiteEditMode()) end
     else
         CH:OpenOptions()
     end
