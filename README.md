@@ -1,6 +1,6 @@
 # ComfyHub
 
-**Version 0.17 – Beta**  
+**Version 0.18 – Beta**  
 **Tested target: WoW Forever 1.60.1 / Build 70009 / Interface 16001**  
 Author: **TheRealDoubleG**  
 Discord: **the.real.double.g**
@@ -26,6 +26,7 @@ ComfyHub is the central addon manager, performance overview and minimap hub for 
 - Native WoW Forever C_AddOnProfiler support with current, recent-average, peak and encounter CPU time in milliseconds; no scriptProfile toggle is required.
 - Changes can be prepared first and applied with a single **Apply & Reload** action.
 - Central ComfyHub minimap button.
+- A shared **Comfy Suite edit mode** registry lets compatible Comfy addons expose movable UI targets through one global toggle.
 - Left click on ComfyHub toggles a compact minimap-edge flyout for **ComfyOnPoint**, **ComfyBar**, **ComfyCC** and **ComfyMacro**.
 - Comfy Suite minimap buttons are bundled under ComfyHub by default and can be restored from the shared **Settings** tab.
 - Right click on ComfyHub opens the manager.
