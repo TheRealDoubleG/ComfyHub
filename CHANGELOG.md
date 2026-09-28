@@ -1,5 +1,11 @@
 # ComfyHub Changelog
 
+## 0.19 Beta – 28.09.2026
+- Added ComfyCastBar, ComfyFrames and ComfyHeal to the Comfy Suite registry and flyout.
+- The new addons can be opened directly from ComfyHub once loaded.
+- ComfyCastBar and ComfyFrames use the shared Suite Edit Mode; ComfyHeal registers its Dispel Center.
+
+
 ## 0.18 Beta – 28.09.2026
 - Added the shared Comfy Suite layout/edit-mode registry.
 - Added a Settings toggle and /ch edit command for Suite edit mode.
