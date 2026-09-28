@@ -1,5 +1,11 @@
 # ComfyHub Changelog
 
+## 0.18 Beta – 28.09.2026
+- Added the shared Comfy Suite layout/edit-mode registry.
+- Added a Settings toggle and /ch edit command for Suite edit mode.
+- Comfy addons can register movable UI targets without becoming dependent on ComfyHub.
+
+
 ## 0.17 Beta – 28.09.2026
 - Added ComfyBattleText to the Suite registry and ComfyHub minimap flyout.
 
