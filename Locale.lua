@@ -97,6 +97,9 @@ local EN = {
     MINIMAP_SHOW = "Show ComfyHub minimap button",
     MINIMAP_BUNDLE = "Bundle Comfy Suite minimap icons under ComfyHub",
     MINIMAP_LOCK = "Lock ComfyHub minimap button",
+    LAYOUT_EDIT = "Comfy Suite edit mode",
+    LAYOUT_EDIT_ON = "Comfy Suite edit mode enabled.",
+    LAYOUT_EDIT_OFF = "Comfy Suite edit mode disabled.",
 
     INFO_TITLE = "ComfyHub",
     INFO_VERSION = "Version",
@@ -214,6 +217,9 @@ local DE = {
     MINIMAP_SHOW = "ComfyHub-Minimap-Button anzeigen",
     MINIMAP_BUNDLE = "Comfy-Suite-Minimap-Icons unter ComfyHub bündeln",
     MINIMAP_LOCK = "ComfyHub-Minimap-Button sperren",
+    LAYOUT_EDIT = "Comfy-Suite-Bearbeitungsmodus",
+    LAYOUT_EDIT_ON = "Comfy-Suite-Bearbeitungsmodus aktiviert.",
+    LAYOUT_EDIT_OFF = "Comfy-Suite-Bearbeitungsmodus deaktiviert.",
 
     INFO_VERSION = "Version",
     INFO_BUILD_DATE = "Build-Datum",
