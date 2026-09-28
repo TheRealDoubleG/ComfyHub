@@ -547,8 +547,12 @@ function CH:BuildSharedSettingsPage(page)
                 function(v) CH:SetMinimapBundling(v) end)
         end
 
-        AddText(L("Experimentelle Addon-Ansicht", "Experimental addon view"), 420, -392, "GameFontNormal")
-        AddCheck(L("Kompakte Manager-Vorschau aktivieren", "Enable compact manager preview"), 420, -419,
+        AddCheck(CH:T("LAYOUT_EDIT"), 420, -382,
+            function() return CH:IsSuiteEditMode() end,
+            function(v) CH:SetSuiteEditMode(v) end)
+
+        AddText(L("Experimentelle Addon-Ansicht", "Experimental addon view"), 420, -425, "GameFontNormal")
+        AddCheck(L("Kompakte Manager-Vorschau aktivieren", "Enable compact manager preview"), 420, -452,
             function() CH:EnsureSharedUISettings() return CH.db.ui.addonManagerPreviewStyle end,
             function(v)
                 CH.db.ui.addonManagerPreviewStyle = v
@@ -558,7 +562,7 @@ function CH:BuildSharedSettingsPage(page)
         AddText(
             L("Nur zum Vergleichen des Layouts. Inspiriert vom gezeigten Addon-Manargl-Screenshot, aber mit eigenem ComfyHub-Aufbau und ohne fremde Grafiken oder Code.",
               "Layout comparison only. Inspired by the shown Addon Manargl screenshot, but built with ComfyHub's own layout, assets and code."),
-            445, -452, "GameFontHighlightSmall", 300)
+            445, -485, "GameFontHighlightSmall", 300)
     end
 
     self:RefreshSharedSettingsPage()
